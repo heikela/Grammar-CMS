@@ -1,5 +1,5 @@
 module.exports = {
-  entry: './main.js',
+  entry: './DocumentEditor.js',
   output: {
     path: './',
     filename: 'index.js'
