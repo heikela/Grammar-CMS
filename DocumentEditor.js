@@ -2,7 +2,17 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { createStore } from 'redux';
 
-import { initDocument } from './grammar';
+import { initDocument, addToRepetition } from './grammar';
+
+const documentEditor = (oldState = initDocument(), action) => {
+  switch (action.type) {
+    case 'ADD_TO_SEQUENCE':
+      return addToRepetition(oldState, action.path);
+    default: return oldState;
+  }
+}
+
+const store = createStore(documentEditor);
 
 const DocumentEditor = (props) => {
   return (
@@ -18,17 +28,21 @@ const renderField = (props) => {
     case 'SEQUENCE': return Sequence(props);
     case 'STRING': return StringField(props);
     case 'REPETITION': return Repetition(props);
+    case 'UNKNOWN': return <div>Unknown element</div>;
   }
 }
 
 const Sequence = (props) => {
   return (
     <div>
-      {props.elements.map((elem) => {
+      {props.keys.map((key) => {
         return (
-          <div key={elem.fieldName}>
-            {elem.fieldName}
-            {renderField(elem)}
+          <div key={key}>
+            {key}
+            {renderField({
+              ...props[key],
+              path: [...props.path, key]
+            })}
           </div>
         );
       })}
@@ -39,7 +53,23 @@ const Sequence = (props) => {
 const Repetition = (props) => {
   return (
     <div>
-      <button>Add Item</button>
+      {props.value.map((elem, i) => {
+        return (
+          <div key={''+i}>
+            {renderField(elem)}
+          </div>
+        )
+      })}
+      <button
+        onClick={(e) => {
+          store.dispatch({
+            type: 'ADD_TO_SEQUENCE',
+            path: props.path
+          })
+        }}
+      >
+        Add Item
+      </button>
     </div>
   )
 }
@@ -50,16 +80,13 @@ const StringField = (props) => {
   );
 }
 
-const documentEditor = (oldState = initDocument(), action) => {
-  switch (action.type) {
-    default: return oldState;
-  }
-}
-
-const store = createStore(documentEditor);
-
 const render = () => {
-  ReactDOM.render(<DocumentEditor {...store.getState()} />,
+  const props = {
+    ...store.getState(),
+    path: []
+  }
+  ReactDOM.render(
+    <DocumentEditor {...props} />,
     document.getElementById('app'));
 }
 
