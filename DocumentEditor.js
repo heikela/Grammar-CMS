@@ -5,17 +5,26 @@ import { createStore } from 'redux';
 import {
   SequenceExpansion,
   RepeatExpansion,
-  addRule,
-  initDocument,
+  Grammar,
   addToRepetition
 } from './grammar';
 
-const grammar =
-  addRule(
-    addRule({}, 'root', new SequenceExpansion(['title', 'questions'])),
-    'questions', new RepeatExpansion('question'));
+const grammar = new Grammar(
+  {
+    root: [new SequenceExpansion(['title', 'questions'])],
+    questions: [new RepeatExpansion('question')],
+    question: [
+      new SequenceExpansion(['openQuestion']),
+      new SequenceExpansion(['multipleChoiceQuestion'])
+    ],
+    openQuestion: [new SequenceExpansion(['question', 'answer'])],
+    multipleChoiceQuestion: [new SequenceExpansion(['question', 'answerChoices'])],
+    answerChoices: [new RepeatExpansion('answerOption')],
+    answerOption: [new SequenceExpansion(['answer', 'correctOrNot'])]
+  }
+);
 
-const documentEditor = (oldState = initDocument(grammar), action) => {
+const documentEditor = (oldState = grammar.initDocument(), action) => {
   switch (action.type) {
     case 'ADD_TO_SEQUENCE':
       return addToRepetition(oldState, action.path);

@@ -13,7 +13,7 @@ export class SequenceExpansion {
       keys: this.termSequence
     }
     for (let key of this.termSequence) {
-      result[key] = expandTerm(grammar, key)
+      result[key] = grammar.expandTerm(key)
     }
     return result;
   }
@@ -32,41 +32,34 @@ export class RepeatExpansion {
   }
 }
 
-export const addRule = (grammar, term, expansion) => {
-  const existingRulesForTerm = grammar[term];
-  const updatedRulesForTerm = existingRulesForTerm !== undefined ?
-    [...existingRulesForTerm, expansion] :
-    [expansion]
-  var termWithAddedRule = {};
-  termWithAddedRule[term] = updatedRulesForTerm;
-  return {
-    ...grammar,
-    ...termWithAddedRule
+export class Grammar {
+  constructor(rules) {
+    this.rules = rules
   }
-}
 
-const expandTerm = (grammar, term) => {
-  const applicableRules = grammar[term];
-  if (applicableRules === undefined) {
-    // For now, assume that a term without an expansion is a string terminal
-    return {
-      type: 'STRING',
-      value: ''
-    }
-  } else if (applicableRules.length == 1) {
-    const expansion = applicableRules[0];
-    return expansion.expand(grammar);
-  } else {
-    return {
-      type: 'INCOMPLETE_CHOICE',
-      alternativeExpansions: applicableRules
+  expandTerm(term) {
+    const applicableRules = this.rules[term];
+    if (applicableRules === undefined) {
+      // For now, assume that a term without an expansion is a string terminal
+      return {
+        type: 'STRING',
+        value: ''
+      }
+    } else if (applicableRules.length == 1) {
+      const expansion = applicableRules[0];
+      return expansion.expand(this);
+    } else {
+      return {
+        type: 'INCOMPLETE_CHOICE',
+        alternativeExpansions: applicableRules
+      }
     }
   }
+
+  initDocument() {
+    return this.expandTerm('root');
+  }
 }
-
-export const initDocument = (grammar) => expandTerm(grammar, 'root');
-
-const stringPlaceholder = () => { return null; }
 
 const createElement = () => {
   return {
@@ -136,46 +129,13 @@ const testaddToRepetition = () => {
 }
 testaddToRepetition();
 
-const testAddRuleForNewTerm = () => {
-  const grammarBefore = {
-    root: 'fooBar'
-  };
-  const newExpansion = new SequenceExpansion(['terminal1'])
-  const grammarAfter = {
-    root: 'fooBar',
-    fooBar: [newExpansion]
-  }
-  deepFreeze(grammarBefore);
-  deepFreeze(newExpansion);
-  expect(
-    addRule(grammarBefore, 'fooBar', newExpansion)
-  ).toEqual(grammarAfter)
-}
-testAddRuleForNewTerm();
-
-const testAddRuleForExistingTerm = () => {
-  const grammarBefore = {
-    root: 'fooBar',
-    fooBar: [['terminal1']]
-  }
-  const newExpansion = new SequenceExpansion(['terminal 2', 'terminal3']);
-  const grammarAfter = {
-    root: 'fooBar',
-    fooBar: [['terminal1'], newExpansion]
-  }
-  deepFreeze(grammarBefore);
-  deepFreeze(newExpansion);
-  expect(
-    addRule(grammarBefore, 'fooBar', newExpansion)
-  ).toEqual(grammarAfter)
-}
-testAddRuleForExistingTerm();
-
 const testExpandTermForSequenceOfString = () => {
-  const grammar = addRule({}, 'root', new SequenceExpansion(['A', 'B']));
+  const grammar = new Grammar({
+    root: [new SequenceExpansion(['A', 'B'])]
+  });
   deepFreeze(grammar);
   expect(
-    expandTerm(grammar, 'root')
+    grammar.expandTerm('root')
   ).toEqual(
     {
       type: 'SEQUENCE',
@@ -194,10 +154,12 @@ const testExpandTermForSequenceOfString = () => {
 testExpandTermForSequenceOfString();
 
 const testExpandTermForRepetition = () => {
-  const grammar = addRule({}, 'root', new RepeatExpansion('A'));
+  const grammar = new Grammar({
+    root: [new RepeatExpansion('A')]
+  });
   deepFreeze(grammar);
   expect(
-    expandTerm(grammar, 'root')
+    grammar.expandTerm('root')
   ).toEqual(
     {
       type: 'REPETITION',
@@ -210,14 +172,14 @@ testExpandTermForRepetition();
 const testExpandTermForMultipleExpansions = () => {
   const expansion1 = new RepeatExpansion('A');
   const expansion2 = new SequenceExpansion(['A', 'B']);
-  const grammar = addRule(
-    addRule({}, 'root', expansion1),
-    'root', expansion2);
+  const grammar = new Grammar({
+    root: [expansion1, expansion2]
+  });
   deepFreeze(grammar);
   deepFreeze(expansion1);
   deepFreeze(expansion2);
   expect(
-    expandTerm(grammar, 'root')
+    grammar.expandTerm('root')
   ).toEqual(
     {
       type: 'INCOMPLETE_CHOICE',
