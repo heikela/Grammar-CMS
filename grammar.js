@@ -1,17 +1,67 @@
-export const initDocument = () => {
-  return {
-    type: 'SEQUENCE',
-    keys: ['title', 'questions'],
-    title: {
-      type: 'STRING',
-      value: '',
-    },
-    questions: {
+export class SequenceExpansion {
+  constructor(termSequence) {
+    this.termSequence = termSequence;
+  }
+
+  expand(grammar) {
+    /* Design choice to revisit: here we have a choice
+       whether we want to create sequences out of expansions with
+       just one term on the right hand side: A = B.
+    */
+    var result = {
+      type: 'SEQUENCE',
+      keys: this.termSequence
+    }
+    for (let key of this.termSequence) {
+      result[key] = expandTerm(grammar, key)
+    }
+    return result;
+  }
+}
+
+export class RepeatExpansion {
+  constructor(termToRepeat) {
+    this.termToRepeat = termToRepeat;
+  }
+
+  expand(grammar) {
+    return {
       type: 'REPETITION',
       value: []
     }
-  };
+  }
 }
+
+export const addRule = (grammar, term, expansion) => {
+  const existingRulesForTerm = grammar[term];
+  const updatedRulesForTerm = existingRulesForTerm !== undefined ?
+    [...existingRulesForTerm, expansion] :
+    [expansion]
+  var termWithAddedRule = {};
+  termWithAddedRule[term] = updatedRulesForTerm;
+  return {
+    ...grammar,
+    ...termWithAddedRule
+  }
+}
+
+const expandTerm = (grammar, term) => {
+  const applicableRules = grammar[term];
+  if (applicableRules === undefined) {
+    // For now, assume that a term without an expansion is a string terminal
+    return {
+      type: 'STRING',
+      value: ''
+    }
+  } else if (applicableRules.length == 1) {
+    const expansion = applicableRules[0];
+    return expansion.expand(grammar);
+  } else {
+    throw 'NOT IMPLEMENTED, multiple expansions for term';
+  }
+}
+
+export const initDocument = (grammar) => expandTerm(grammar, 'root');
 
 const stringPlaceholder = () => { return null; }
 
@@ -82,5 +132,76 @@ const testaddToRepetition = () => {
   ).toEqual(documentAfter);
 }
 testaddToRepetition();
+
+const testAddRuleForNewTerm = () => {
+  const grammarBefore = {
+    root: 'fooBar'
+  };
+  const newExpansion = new SequenceExpansion(['terminal1'])
+  const grammarAfter = {
+    root: 'fooBar',
+    fooBar: [newExpansion]
+  }
+  deepFreeze(grammarBefore);
+  deepFreeze(newExpansion);
+  expect(
+    addRule(grammarBefore, 'fooBar', newExpansion)
+  ).toEqual(grammarAfter)
+}
+testAddRuleForNewTerm();
+
+const testAddRuleForExistingTerm = () => {
+  const grammarBefore = {
+    root: 'fooBar',
+    fooBar: [['terminal1']]
+  }
+  const newExpansion = new SequenceExpansion(['terminal 2', 'terminal3']);
+  const grammarAfter = {
+    root: 'fooBar',
+    fooBar: [['terminal1'], newExpansion]
+  }
+  deepFreeze(grammarBefore);
+  deepFreeze(newExpansion);
+  expect(
+    addRule(grammarBefore, 'fooBar', newExpansion)
+  ).toEqual(grammarAfter)
+}
+testAddRuleForExistingTerm();
+
+const testExpandTermForSequenceOfString = () => {
+  const grammar = addRule({}, 'root', new SequenceExpansion(['A', 'B']));
+  deepFreeze(grammar);
+  expect(
+    expandTerm(grammar, 'root')
+  ).toEqual(
+    {
+      type: 'SEQUENCE',
+      keys: ['A', 'B'],
+      A: {
+        type: 'STRING',
+        value: '',
+      },
+      B: {
+        type: 'STRING',
+        value: ''
+      }
+    }
+  )
+}
+testExpandTermForSequenceOfString();
+
+const testExpandTermForRepetition = () => {
+  const grammar = addRule({}, 'root', new RepeatExpansion('A'));
+  deepFreeze(grammar);
+  expect(
+    expandTerm(grammar, 'root')
+  ).toEqual(
+    {
+      type: 'REPETITION',
+      value: []
+    }
+  )
+}
+testExpandTermForRepetition();
 
 console.log('grammar tests pass');

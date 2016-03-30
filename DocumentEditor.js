@@ -2,9 +2,20 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { createStore } from 'redux';
 
-import { initDocument, addToRepetition } from './grammar';
+import {
+  SequenceExpansion,
+  RepeatExpansion,
+  addRule,
+  initDocument,
+  addToRepetition
+} from './grammar';
 
-const documentEditor = (oldState = initDocument(), action) => {
+const grammar =
+  addRule(
+    addRule({}, 'root', new SequenceExpansion(['title', 'questions'])),
+    'questions', new RepeatExpansion('question'));
+
+const documentEditor = (oldState = initDocument(grammar), action) => {
   switch (action.type) {
     case 'ADD_TO_SEQUENCE':
       return addToRepetition(oldState, action.path);
