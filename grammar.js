@@ -57,7 +57,10 @@ const expandTerm = (grammar, term) => {
     const expansion = applicableRules[0];
     return expansion.expand(grammar);
   } else {
-    throw 'NOT IMPLEMENTED, multiple expansions for term';
+    return {
+      type: 'INCOMPLETE_CHOICE',
+      alternativeExpansions: applicableRules
+    }
   }
 }
 
@@ -203,5 +206,25 @@ const testExpandTermForRepetition = () => {
   )
 }
 testExpandTermForRepetition();
+
+const testExpandTermForMultipleExpansions = () => {
+  const expansion1 = new RepeatExpansion('A');
+  const expansion2 = new SequenceExpansion(['A', 'B']);
+  const grammar = addRule(
+    addRule({}, 'root', expansion1),
+    'root', expansion2);
+  deepFreeze(grammar);
+  deepFreeze(expansion1);
+  deepFreeze(expansion2);
+  expect(
+    expandTerm(grammar, 'root')
+  ).toEqual(
+    {
+      type: 'INCOMPLETE_CHOICE',
+      alternativeExpansions: [expansion1, expansion2]
+    }
+  )
+}
+testExpandTermForMultipleExpansions();
 
 console.log('grammar tests pass');
