@@ -20,6 +20,10 @@ export class SequenceExpansion {
       elements
     );
   }
+
+  toString() {
+    return this.termSequence.join(' ');
+  }
 }
 
 export class RepeatExpansion {
@@ -33,6 +37,10 @@ export class RepeatExpansion {
       []
     );
   }
+
+  toString() {
+    return this.termToRepeat + '*';
+  }
 }
 
 export class Grammar {
@@ -44,18 +52,12 @@ export class Grammar {
     const applicableRules = this.rules[term];
     if (applicableRules === undefined) {
       // For now, assume that a term without an expansion is a string terminal
-      return {
-        type: 'STRING',
-        value: ''
-      }
+      return new StringElement();
     } else if (applicableRules.length == 1) {
       const expansion = applicableRules[0];
       return expansion.expand(this);
     } else {
-      return {
-        type: 'INCOMPLETE_CHOICE',
-        alternativeExpansions: applicableRules
-      }
+      return new IncompleteChoiceElement(applicableRules);
     }
   }
 
@@ -92,12 +94,12 @@ export class RepetitionElement {
     this.value = value;
   }
 
-  addNewElement() {
+  addNewElement(grammar) {
     return new RepetitionElement(
       this.typeToRepeat,
       [
         ...this.value,
-        createElement()
+        grammar.expandTerm(this.typeToRepeat)
       ]
     );
   }
@@ -112,26 +114,36 @@ export class StringElement {
     this.value = '';
   }
   get type() {
-    return 'STRING'
+    return 'STRING';
   }
 }
 
-const createElement = () => {
+export class IncompleteChoiceElement {
+  constructor(alternateExpansions) {
+    this.alternateExpansions = alternateExpansions;
+  }
+
+  get type() {
+    return 'INCOMPLETE_CHOICE';
+  }
+}
+
+const createElement = (term) => {
   return {
     type: 'UNKNOWN'
   }
 }
 
-export const addToRepetition = (document, path) => {
+export const addToRepetition = (grammar, document, path) => {
   if (path.length === 0) {
     if (document.type === 'REPETITION') {
-      return document.addNewElement();
+      return document.addNewElement(grammar);
     } else {
       throw ('addToRepetition called for a non-sequence path');
     }
   } else {
     const currentKey = path[0];
-    return document.updateElement(currentKey, addToRepetition(document.elements[currentKey], path.slice(1)));
+    return document.updateElement(currentKey, addToRepetition(grammar, document.elements[currentKey], path.slice(1)));
   }
 }
 
@@ -144,10 +156,7 @@ const testaddToRepetition = () => {
     new SequenceElement(
       ['title', 'questions'],
       {
-        title: {
-            type: 'STRING',
-            value: '',
-        },
+        title: new StringElement(),
         questions:
           new RepetitionElement(
             'question',
@@ -155,27 +164,26 @@ const testaddToRepetition = () => {
           )
       }
     );
+  const grammar = new Grammar({}); // Would it be important for this to be a realistic grammar for the scenario?
   const documentAfter =
     new SequenceElement(
       ['title', 'questions'],
       {
-        title: {
-            type: 'STRING',
-            value: '',
-        },
+        title: new StringElement(),
         questions:
           new RepetitionElement(
             'question',
-            [{
-              type: 'UNKNOWN'
-            }]
+            [
+              new StringElement()
+            ]
           )
       }
     );
   deepFreeze(documentBefore);
+  deepFreeze(grammar);
 
   expect(
-    addToRepetition(documentBefore, ['questions'])
+    addToRepetition(grammar, documentBefore, ['questions'])
   ).toEqual(documentAfter);
 }
 testaddToRepetition();
@@ -191,14 +199,8 @@ const testExpandTermForSequenceOfString = () => {
     new SequenceElement(
       ['A', 'B'],
       {
-        A: {
-          type: 'STRING',
-          value: '',
-        },
-        B: {
-          type: 'STRING',
-          value: ''
-        }
+        A: new StringElement(),
+        B: new StringElement()
       }
     )
   )
@@ -232,12 +234,7 @@ const testExpandTermForMultipleExpansions = () => {
   deepFreeze(expansion2);
   expect(
     grammar.expandTerm('root')
-  ).toEqual(
-    {
-      type: 'INCOMPLETE_CHOICE',
-      alternativeExpansions: [expansion1, expansion2]
-    }
-  )
+  ).toEqual(new IncompleteChoiceElement([expansion1, expansion2]))
 }
 testExpandTermForMultipleExpansions();
 

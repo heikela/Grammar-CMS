@@ -27,7 +27,7 @@ const grammar = new Grammar(
 const documentEditor = (oldState = grammar.initDocument(), action) => {
   switch (action.type) {
     case 'ADD_TO_SEQUENCE':
-      return addToRepetition(oldState, action.path);
+      return addToRepetition(grammar, oldState, action.path);
     default: return oldState;
   }
 }
@@ -49,6 +49,7 @@ const Field = (props) => {
     case 'STRING': return StringField(props);
     case 'REPETITION': return Repetition(props);
     case 'UNKNOWN': return <div>Unknown element</div>;
+    case 'INCOMPLETE_CHOICE': return ChoiceToMake(props);
     default: throw 'element type not understood in renderField()';
   }
 }
@@ -101,6 +102,20 @@ const Repetition = (props) => {
 const StringField = (props) => {
   return (
     <input type='text' />
+  );
+}
+
+const ChoiceToMake = (props) => {
+  return (
+    <select>
+      <option id='_not_chosen'>Choose Type</option>
+      {
+        props.element.alternateExpansions.map((term) => {
+          const termString = term.toString();
+          return <option key={termString} id={termString}>{termString}</option>;
+        })
+      }
+    </select>
   );
 }
 
