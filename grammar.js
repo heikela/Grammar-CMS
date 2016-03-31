@@ -89,16 +89,27 @@ export class SequenceElement {
 }
 
 export class RepetitionElement {
-  constructor(typeToRepeat, value = []) {
+  constructor(typeToRepeat, elements = []) {
     this.typeToRepeat = typeToRepeat;
-    this.value = value;
+    this.elements = elements;
+  }
+
+  updateElement(key, updated) {
+    return new RepetitionElement(
+      this.typeToRepeat,
+      [
+        ...this.elements.slice(0, key),
+        updated,
+        ...this.elements.slice(key + 1)
+      ]
+    )
   }
 
   addNewElement(grammar) {
     return new RepetitionElement(
       this.typeToRepeat,
       [
-        ...this.value,
+        ...this.elements,
         grammar.expandTerm(this.typeToRepeat)
       ]
     );
@@ -123,6 +134,10 @@ export class IncompleteChoiceElement {
     this.alternateExpansions = alternateExpansions;
   }
 
+  selectExpansion(grammar, selected) {
+    return grammar.expandTerm(selected);
+  }
+
   get type() {
     return 'INCOMPLETE_CHOICE';
   }
@@ -139,11 +154,25 @@ export const addToRepetition = (grammar, document, path) => {
     if (document.type === 'REPETITION') {
       return document.addNewElement(grammar);
     } else {
-      throw ('addToRepetition called for a non-sequence path');
+      throw 'addToRepetition called for a non-sequence path';
     }
   } else {
     const currentKey = path[0];
     return document.updateElement(currentKey, addToRepetition(grammar, document.elements[currentKey], path.slice(1)));
+  }
+}
+
+export const selectExpansion = (grammar, document, path, selected) => {
+  console.log('selectExpansion(grammar, document, path, selected):', grammar, document, path, selected);
+  if (path.length === 0) {
+    if (document.type === 'INCOMPLETE_CHOICE') {
+      return document.selectExpansion(grammar, selected);
+    } else {
+      throw 'selectExpansion called for an element that is not an incomplete expansion choice';
+    }
+  } else {
+    const currentKey = path[0];
+    return document.updateElement(currentKey, selectExpansion(grammar, document.elements[currentKey], path.slice(1), selected));
   }
 }
 

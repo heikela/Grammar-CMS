@@ -6,7 +6,8 @@ import {
   SequenceExpansion,
   RepeatExpansion,
   Grammar,
-  addToRepetition
+  addToRepetition,
+  selectExpansion
 } from './grammar';
 
 const grammar = new Grammar(
@@ -17,8 +18,8 @@ const grammar = new Grammar(
       new SequenceExpansion(['openQuestion']),
       new SequenceExpansion(['multipleChoiceQuestion'])
     ],
-    openQuestion: [new SequenceExpansion(['question', 'answer'])],
-    multipleChoiceQuestion: [new SequenceExpansion(['question', 'answerChoices'])],
+    openQuestion: [new SequenceExpansion(['questionPrompt', 'answer'])],
+    multipleChoiceQuestion: [new SequenceExpansion(['questionPrompt', 'answerChoices'])],
     answerChoices: [new RepeatExpansion('answerOption')],
     answerOption: [new SequenceExpansion(['answer', 'correctOrNot'])]
   }
@@ -28,6 +29,8 @@ const documentEditor = (oldState = grammar.initDocument(), action) => {
   switch (action.type) {
     case 'ADD_TO_SEQUENCE':
       return addToRepetition(grammar, oldState, action.path);
+    case 'SELECT_EXPANSION':
+      return selectExpansion(grammar, oldState, action.path, action.selected);
     default: return oldState;
   }
 }
@@ -75,12 +78,12 @@ const Sequence = (props) => {
 const Repetition = (props) => {
   return (
     <div>
-      {props.element.value.map((elem, i) => {
+      {props.element.elements.map((elem, i) => {
         return (
           <div key={''+i}>
             <Field
               element={elem}
-              path={props.path}
+              path={[...props.path, i]}
             />
           </div>
         )
@@ -107,7 +110,13 @@ const StringField = (props) => {
 
 const ChoiceToMake = (props) => {
   return (
-    <select>
+    <select onChange={(e) => {
+      store.dispatch({
+        type: 'SELECT_EXPANSION',
+        path: props.path,
+        selected: e.target.value
+      })
+    }}>
       <option id='_not_chosen'>Choose Type</option>
       {
         props.element.alternateExpansions.map((term) => {
