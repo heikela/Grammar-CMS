@@ -86,6 +86,14 @@ export class SequenceElement {
       }
     )
   }
+
+  objectForJson() {
+    var result = {};
+    for (const key of this.keys) {
+      result[key] = this.elements[key].objectForJson();
+    }
+    return result;
+  }
 }
 
 export class RepetitionElement {
@@ -118,6 +126,11 @@ export class RepetitionElement {
   get type() {
     return 'REPETITION';
   }
+
+  objectForJson() {
+    return this.elements.map((e) => e.objectForJson());
+  }
+
 }
 
 export class StringElement {
@@ -132,6 +145,10 @@ export class StringElement {
   updated(updatedValue) {
     return new StringElement(updatedValue);
   }
+
+  objectForJson() {
+    return this.value;
+  }
 }
 
 export class IncompleteChoiceElement {
@@ -145,6 +162,10 @@ export class IncompleteChoiceElement {
 
   get type() {
     return 'INCOMPLETE_CHOICE';
+  }
+
+  objectForJson() {
+    return 'incomplete_choice';
   }
 }
 

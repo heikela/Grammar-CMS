@@ -45,6 +45,10 @@ const DocumentEditor = (props) => {
     <div>
       <h1>Edit your new document here</h1>
       <Field {...props} />
+      <hr />
+      <pre>
+        {JSON.stringify(props.element.objectForJson())}
+      </pre>
     </div>
   )
 }
