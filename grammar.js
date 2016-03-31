@@ -1,3 +1,4 @@
+// Grammar classes
 export class SequenceExpansion {
   constructor(termSequence) {
     this.termSequence = termSequence;
@@ -8,14 +9,14 @@ export class SequenceExpansion {
        whether we want to create sequences out of expansions with
        just one term on the right hand side: A = B.
     */
-    var result = {
-      type: 'SEQUENCE',
-      keys: this.termSequence
-    }
+    var elements = {};
     for (let key of this.termSequence) {
-      result[key] = grammar.expandTerm(key)
+      elements[key] = grammar.expandTerm(key)
     }
-    return result;
+    return new SequenceElement(
+      this.termSequence,
+      elements
+    );
   }
 }
 
@@ -61,6 +62,37 @@ export class Grammar {
   }
 }
 
+// Document and element classes
+export class SequenceElement {
+  constructor(keys, elements) {
+    this.keys = keys;
+    this.elements = elements;
+  }
+
+  type() {
+    return 'SEQUENCE';
+  }
+
+  updateElement(key, updated) {
+    return new SequenceElement(
+      this.keys,
+      {
+        ...this.elements,
+        [key]: updated
+      }
+    )
+  }
+}
+
+export class StringElement {
+  constructor() {
+    this.value = '';
+  }
+  type() {
+    return 'STRING'
+  }
+}
+
 const createElement = () => {
   return {
     type: 'UNKNOWN'
@@ -82,12 +114,7 @@ export const addToRepetition = (document, path) => {
     }
   } else {
     const currentKey = path[0];
-    let affectedTree = {};
-    affectedTree[currentKey] = addToRepetition(document[currentKey], path.slice(1));
-    return {
-      ...document,
-      ...affectedTree
-    }
+    return document.updateElement(currentKey, addToRepetition(document.elements[currentKey], path.slice(1)));
   }
 }
 
@@ -96,33 +123,40 @@ import expect from 'expect';
 import deepFreeze from 'deep-freeze';
 
 const testaddToRepetition = () => {
-  const documentBefore = {
-    type: 'SEQUENCE',
-    title: {
-        type: 'STRING',
-        value: '',
-    },
-    questions: {
-      type: 'REPETITION',
-      value: []
-    }
-  };
-  const documentAfter = {
-    type: 'SEQUENCE',
-    title: {
-        type: 'STRING',
-        value: '',
-    },
-    questions: {
-      type: 'REPETITION',
-      value: [
-        {
-          type: 'UNKNOWN'
+  const documentBefore =
+    new SequenceElement(
+      ['title', 'questions'],
+      {
+        title: {
+            type: 'STRING',
+            value: '',
+        },
+        questions: {
+          type: 'REPETITION',
+          value: []
         }
-      ]
-    }
-  };
+      }
+    );
+  const documentAfter =
+    new SequenceElement(
+      ['title', 'questions'],
+      {
+        title: {
+            type: 'STRING',
+            value: '',
+        },
+        questions: {
+          type: 'REPETITION',
+          value: [
+            {
+              type: 'UNKNOWN'
+            }
+          ]
+        }
+      }
+    );
   deepFreeze(documentBefore);
+
   expect(
     addToRepetition(documentBefore, ['questions'])
   ).toEqual(documentAfter);
@@ -137,18 +171,19 @@ const testExpandTermForSequenceOfString = () => {
   expect(
     grammar.expandTerm('root')
   ).toEqual(
-    {
-      type: 'SEQUENCE',
-      keys: ['A', 'B'],
-      A: {
-        type: 'STRING',
-        value: '',
-      },
-      B: {
-        type: 'STRING',
-        value: ''
+    new SequenceElement(
+      ['A', 'B'],
+      {
+        A: {
+          type: 'STRING',
+          value: '',
+        },
+        B: {
+          type: 'STRING',
+          value: ''
+        }
       }
-    }
+    )
   )
 }
 testExpandTermForSequenceOfString();

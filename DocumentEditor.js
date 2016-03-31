@@ -60,7 +60,7 @@ const Sequence = (props) => {
           <div key={key}>
             {key}
             {renderField({
-              ...props[key],
+              ...props.elements[key],
               path: [...props.path, key]
             })}
           </div>
