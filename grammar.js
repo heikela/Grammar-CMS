@@ -121,11 +121,16 @@ export class RepetitionElement {
 }
 
 export class StringElement {
-  constructor() {
-    this.value = '';
+  constructor(value = '') {
+    this.value = value;
   }
+
   get type() {
     return 'STRING';
+  }
+
+  updated(updatedValue) {
+    return new StringElement(updatedValue);
   }
 }
 
@@ -176,6 +181,19 @@ export const selectExpansion = (grammar, document, path, selected) => {
   }
 }
 
+export const updateString = (document, path, updatedValue) => {
+  if (path.length === 0) {
+    if (document.type === 'STRING') {
+      return document.updated(updatedValue);
+    } else {
+      throw 'updateString alled for an element that is not a string';
+    }
+  } else {
+    const currentKey = path[0];
+    return document.updateElement(currentKey, updateString(document.elements[currentKey], path.slice(1), updatedValue));
+  }
+}
+
 // Tests
 import expect from 'expect';
 import deepFreeze from 'deep-freeze';
@@ -216,6 +234,40 @@ const testaddToRepetition = () => {
   ).toEqual(documentAfter);
 }
 testaddToRepetition();
+
+const testUpdateStringElement = () => {
+  const documentBefore = new SequenceElement(
+    ['A', 'Bs'],
+    {
+      A: new StringElement(),
+      Bs: new RepetitionElement(
+        'B',
+        [
+          new StringElement('bar'),
+          new StringElement('foo')
+        ]
+      )
+    }
+  )
+  const documentAfter = new SequenceElement(
+    ['A', 'Bs'],
+    {
+      A: new StringElement(),
+      Bs: new RepetitionElement(
+        'B',
+        [
+          new StringElement('bar'),
+          new StringElement('fooBar')
+        ]
+      )
+    }
+  )
+  deepFreeze(documentBefore)
+  expect(
+    updateString(documentBefore, ['Bs', 1], 'fooBar')
+  ).toEqual(documentAfter);
+}
+testUpdateStringElement()
 
 const testExpandTermForSequenceOfString = () => {
   const grammar = new Grammar({

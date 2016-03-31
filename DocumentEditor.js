@@ -7,7 +7,8 @@ import {
   RepeatExpansion,
   Grammar,
   addToRepetition,
-  selectExpansion
+  selectExpansion,
+  updateString
 } from './grammar';
 
 const grammar = new Grammar(
@@ -31,6 +32,8 @@ const documentEditor = (oldState = grammar.initDocument(), action) => {
       return addToRepetition(grammar, oldState, action.path);
     case 'SELECT_EXPANSION':
       return selectExpansion(grammar, oldState, action.path, action.selected);
+    case 'UPDATED_STRING':
+      return updateString(oldState, action.path, action.updatedValue);
     default: return oldState;
   }
 }
@@ -104,7 +107,18 @@ const Repetition = (props) => {
 
 const StringField = (props) => {
   return (
-    <input type='text' />
+    <input
+      type='text'
+      onChange={
+        (e) => {
+          store.dispatch({
+            type: 'UPDATED_STRING',
+            path: props.path,
+            updatedValue: e.target.value
+          });
+        }
+      }
+    />
   );
 }
 
