@@ -38,31 +38,32 @@ const DocumentEditor = (props) => {
   return (
     <div>
       <h1>Edit your new document here</h1>
-      <Sequence {...props} />
+      <Field {...props} />
     </div>
   )
 }
 
-const renderField = (props) => {
-  switch (props.type) {
+const Field = (props) => {
+  switch (props.element.type) {
     case 'SEQUENCE': return Sequence(props);
     case 'STRING': return StringField(props);
     case 'REPETITION': return Repetition(props);
     case 'UNKNOWN': return <div>Unknown element</div>;
+    default: throw 'element type not understood in renderField()';
   }
 }
 
 const Sequence = (props) => {
   return (
     <div>
-      {props.keys.map((key) => {
+      {props.element.keys.map((key) => {
         return (
           <div key={key}>
             {key}
-            {renderField({
-              ...props.elements[key],
-              path: [...props.path, key]
-            })}
+            <Field
+              element={props.element.elements[key]}
+              path={[...props.path, key]}
+            />
           </div>
         );
       })}
@@ -73,10 +74,13 @@ const Sequence = (props) => {
 const Repetition = (props) => {
   return (
     <div>
-      {props.value.map((elem, i) => {
+      {props.element.value.map((elem, i) => {
         return (
           <div key={''+i}>
-            {renderField(elem)}
+            <Field
+              element={elem}
+              path={props.path}
+            />
           </div>
         )
       })}
@@ -102,11 +106,14 @@ const StringField = (props) => {
 
 const render = () => {
   const props = {
-    ...store.getState(),
+    element: store.getState(),
     path: []
   }
   ReactDOM.render(
-    <DocumentEditor {...props} />,
+    <DocumentEditor
+      element={store.getState()}
+      path={[]}
+    />,
     document.getElementById('app'));
 }
 

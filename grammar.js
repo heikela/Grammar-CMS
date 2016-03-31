@@ -1,3 +1,5 @@
+// import whyNotEqual from 'is-equal/why';
+
 // Grammar classes
 export class SequenceExpansion {
   constructor(termSequence) {
@@ -26,10 +28,10 @@ export class RepeatExpansion {
   }
 
   expand(grammar) {
-    return {
-      type: 'REPETITION',
-      value: []
-    }
+    return new RepetitionElement(
+      this.termToRepeat,
+      []
+    );
   }
 }
 
@@ -69,7 +71,7 @@ export class SequenceElement {
     this.elements = elements;
   }
 
-  type() {
+  get type() {
     return 'SEQUENCE';
   }
 
@@ -84,11 +86,32 @@ export class SequenceElement {
   }
 }
 
+export class RepetitionElement {
+  constructor(typeToRepeat, value = []) {
+    this.typeToRepeat = typeToRepeat;
+    this.value = value;
+  }
+
+  addNewElement() {
+    return new RepetitionElement(
+      this.typeToRepeat,
+      [
+        ...this.value,
+        createElement()
+      ]
+    );
+  }
+
+  get type() {
+    return 'REPETITION';
+  }
+}
+
 export class StringElement {
   constructor() {
     this.value = '';
   }
-  type() {
+  get type() {
     return 'STRING'
   }
 }
@@ -102,13 +125,7 @@ const createElement = () => {
 export const addToRepetition = (document, path) => {
   if (path.length === 0) {
     if (document.type === 'REPETITION') {
-      return {
-        ...document,
-        value: [
-          ...document.value,
-          createElement()
-        ]
-      }
+      return document.addNewElement();
     } else {
       throw ('addToRepetition called for a non-sequence path');
     }
@@ -131,10 +148,11 @@ const testaddToRepetition = () => {
             type: 'STRING',
             value: '',
         },
-        questions: {
-          type: 'REPETITION',
-          value: []
-        }
+        questions:
+          new RepetitionElement(
+            'question',
+            []
+          )
       }
     );
   const documentAfter =
@@ -145,14 +163,13 @@ const testaddToRepetition = () => {
             type: 'STRING',
             value: '',
         },
-        questions: {
-          type: 'REPETITION',
-          value: [
-            {
+        questions:
+          new RepetitionElement(
+            'question',
+            [{
               type: 'UNKNOWN'
-            }
-          ]
-        }
+            }]
+          )
       }
     );
   deepFreeze(documentBefore);
@@ -196,10 +213,10 @@ const testExpandTermForRepetition = () => {
   expect(
     grammar.expandTerm('root')
   ).toEqual(
-    {
-      type: 'REPETITION',
-      value: []
-    }
+    new RepetitionElement(
+      'A',
+      []
+    )
   )
 }
 testExpandTermForRepetition();
