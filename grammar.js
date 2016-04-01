@@ -194,12 +194,6 @@ export class IncompleteChoiceElement extends Element {
   }
 }
 
-const createElement = (term) => {
-  return {
-    type: 'UNKNOWN'
-  }
-}
-
 export const addToRepetition = (grammar, document, path) => {
   return document.updatedAt(path, (document) => {
     return document.addNewElement(grammar); // Would it be better for diagnostics to explicitly check the type?
