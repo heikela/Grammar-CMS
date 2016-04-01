@@ -67,8 +67,30 @@ export class Grammar {
 }
 
 // Document and element classes
-export class SequenceElement {
+class Element {
+  updatedAt(path, updateFn) {
+    if (path.length !== 0) {
+      throw "A basic element does not have sub-elements to update"
+    } else {
+      return updateFn(this); // This means that it's the responsibility of the update function to maintain the same element type.
+    }
+  }
+}
+
+class CompositeElement extends Element {
+  updatedAt(path, updateFn) {
+    if (path.length === 0) {
+      return updateFn(this);
+    } else {
+      const currentKey = path[0];
+      return this.updateElement(currentKey, this.elements[currentKey].updatedAt(path.slice(1), updateFn));
+    }
+  }
+}
+
+export class SequenceElement extends CompositeElement {
   constructor(keys, elements) {
+    super();
     this.keys = keys;
     this.elements = elements;
   }
@@ -96,8 +118,9 @@ export class SequenceElement {
   }
 }
 
-export class RepetitionElement {
+export class RepetitionElement extends CompositeElement {
   constructor(typeToRepeat, elements = []) {
+    super();
     this.typeToRepeat = typeToRepeat;
     this.elements = elements;
   }
@@ -133,8 +156,9 @@ export class RepetitionElement {
 
 }
 
-export class StringElement {
+export class StringElement extends Element {
   constructor(value = '') {
+    super();
     this.value = value;
   }
 
@@ -151,8 +175,9 @@ export class StringElement {
   }
 }
 
-export class IncompleteChoiceElement {
+export class IncompleteChoiceElement extends Element {
   constructor(alternateExpansions) {
+    super();
     this.alternateExpansions = alternateExpansions;
   }
 
@@ -176,48 +201,76 @@ const createElement = (term) => {
 }
 
 export const addToRepetition = (grammar, document, path) => {
-  if (path.length === 0) {
-    if (document.type === 'REPETITION') {
-      return document.addNewElement(grammar);
-    } else {
-      throw 'addToRepetition called for a non-sequence path';
-    }
-  } else {
-    const currentKey = path[0];
-    return document.updateElement(currentKey, addToRepetition(grammar, document.elements[currentKey], path.slice(1)));
-  }
+  return document.updatedAt(path, (document) => {
+    return document.addNewElement(grammar); // Would it be better for diagnostics to explicitly check the type?
+  });
 }
 
 export const selectExpansion = (grammar, document, path, selected) => {
-  console.log('selectExpansion(grammar, document, path, selected):', grammar, document, path, selected);
-  if (path.length === 0) {
-    if (document.type === 'INCOMPLETE_CHOICE') {
-      return document.selectExpansion(grammar, selected);
-    } else {
-      throw 'selectExpansion called for an element that is not an incomplete expansion choice';
-    }
-  } else {
-    const currentKey = path[0];
-    return document.updateElement(currentKey, selectExpansion(grammar, document.elements[currentKey], path.slice(1), selected));
-  }
+  return document.updatedAt(path, (document) => {
+    return document.selectExpansion(grammar, selected);
+  });
 }
 
 export const updateString = (document, path, updatedValue) => {
-  if (path.length === 0) {
-    if (document.type === 'STRING') {
-      return document.updated(updatedValue);
-    } else {
-      throw 'updateString alled for an element that is not a string';
-    }
-  } else {
-    const currentKey = path[0];
-    return document.updateElement(currentKey, updateString(document.elements[currentKey], path.slice(1), updatedValue));
-  }
+  return document.updatedAt(path, (document) => {
+    return document.updated(updatedValue);
+  });
 }
 
 // Tests
 import expect from 'expect';
 import deepFreeze from 'deep-freeze';
+
+const testUpdatedAtForElementInRepetition = () => {
+  const documentBefore = new RepetitionElement(
+    'A',
+    [
+      new StringElement('foo'),
+      new StringElement('bar'),
+      new StringElement('baz')
+    ]
+  )
+  const path = [1];
+  const documentAfter = new RepetitionElement(
+    'A',
+    [
+      new StringElement('foo'),
+      new StringElement('bar2'),
+      new StringElement('baz')
+    ]
+  );
+  deepFreeze(documentBefore);
+  deepFreeze(path);
+  expect(
+    documentBefore.updatedAt(path, (element) => new StringElement(element.value + '2'))
+  ).toEqual(documentAfter);
+}
+testUpdatedAtForElementInRepetition();
+
+const testUpdatedAtForElementInSequence = () => {
+  const documentBefore = new SequenceElement(
+    ['A','B'],
+    {
+      A: new StringElement('foo'),
+      B: new StringElement('bar')
+    }
+  )
+  const path = ['B'];
+  const documentAfter = new SequenceElement(
+    ['A','B'],
+    {
+      A: new StringElement('foo'),
+      B: new StringElement('bar2')
+    }
+  )
+  deepFreeze(documentBefore);
+  deepFreeze(path);
+  expect(
+    documentBefore.updatedAt(path, (element) => new StringElement(element.value + '2'))
+  ).toEqual(documentAfter);
+}
+testUpdatedAtForElementInSequence();
 
 const testaddToRepetition = () => {
   const documentBefore =
