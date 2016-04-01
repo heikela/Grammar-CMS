@@ -5,11 +5,16 @@ import { createStore } from 'redux';
 import {
   SequenceExpansion,
   RepeatExpansion,
-  Grammar,
+  Grammar
+} from './grammar';
+
+import {
   addToRepetition,
   selectExpansion,
   updateString
-} from './grammar';
+} from './document';
+
+import { documentTestResult } from './documentTest';
 
 require('./styles.css');
 
