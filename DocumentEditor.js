@@ -11,6 +11,8 @@ import {
   updateString
 } from './grammar';
 
+require('./styles.css');
+
 const grammar = new Grammar(
   {
     root: [new SequenceExpansion(['title', 'questions'])],
@@ -66,11 +68,11 @@ const Field = (props) => {
 
 const Sequence = (props) => {
   return (
-    <div>
+    <div className='elementdiv'>
       {props.element.keys.map((key) => {
         return (
-          <div key={key}>
-            {key}
+          <div className='elementdiv' key={key}>
+            <div className='elementlabel'>{key}</div>
             <Field
               element={props.element.elements[key]}
               path={[...props.path, key]}
@@ -84,7 +86,7 @@ const Sequence = (props) => {
 
 const Repetition = (props) => {
   return (
-    <div>
+    <div className='elementdiv'>
       {props.element.elements.map((elem, i) => {
         return (
           <div key={''+i}>
