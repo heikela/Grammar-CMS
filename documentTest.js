@@ -8,7 +8,7 @@ import {
   IncompleteChoiceElement,
   addToRepetition,
   updateString,
-
+  removeFromRepetition
 } from './document';
 
 const testUpdatedAtForElementInRepetition = () => {
@@ -99,6 +99,46 @@ const testaddToRepetition = () => {
   ).toEqual(documentAfter);
 }
 testaddToRepetition();
+
+const testRemoveFromRepetition = () => {
+  const documentBefore =
+    new SequenceElement(
+      ['title', 'questions'],
+      {
+        title: new StringElement(),
+        questions:
+          new RepetitionElement(
+            'question',
+            [
+              new StringElement('zero'),
+              new StringElement('one'),
+              new StringElement('two')
+            ]
+          )
+      }
+    );
+  const documentAfter =
+    new SequenceElement(
+      ['title', 'questions'],
+      {
+        title: new StringElement(),
+        questions:
+          new RepetitionElement(
+            'question',
+            [
+              new StringElement('zero'),
+              new StringElement('two')
+            ]
+          )
+      }
+    );
+  deepFreeze(documentBefore);
+
+  expect(
+    removeFromRepetition(documentBefore, ['questions', 1])
+  ).toEqual(documentAfter);
+}
+testRemoveFromRepetition();
 
 const testUpdateStringElement = () => {
   const documentBefore = new SequenceElement(

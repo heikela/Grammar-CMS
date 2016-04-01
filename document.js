@@ -78,6 +78,16 @@ export class RepetitionElement extends CompositeElement {
     );
   }
 
+  removeElement(index) {
+    return new RepetitionElement(
+      this.typeToRepeat,
+      [
+        ...this.elements.slice(0, index),
+        ...this.elements.slice(index + 1)
+      ]
+    )
+  }
+
   get type() {
     return 'REPETITION';
   }
@@ -142,4 +152,13 @@ export const updateString = (document, path, updatedValue) => {
   return document.updatedAt(path, (document) => {
     return document.updated(updatedValue);
   });
+}
+
+export const removeFromRepetition = (document, path) => {
+  if (path.length === 0) {
+    throw 'cannot remove the document root';
+  }
+  return document.updatedAt(path.slice(0, path.length-1), (document) => {
+    return document.removeElement(path[path.length-1]);
+  })
 }
