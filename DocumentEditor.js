@@ -11,7 +11,8 @@ import {
 import {
   addToRepetition,
   selectExpansion,
-  updateString
+  updateString,
+  removeFromRepetition
 } from './document';
 
 import { documentTestResult } from './documentTest';
@@ -41,6 +42,8 @@ const documentEditor = (oldState = grammar.initDocument(), action) => {
       return selectExpansion(grammar, oldState, action.path, action.selected);
     case 'UPDATED_STRING':
       return updateString(oldState, action.path, action.updatedValue);
+    case 'REMOVE_ELEMENT':
+      return removeFromRepetition(oldState, action.path);
     default: return oldState;
   }
 }
@@ -93,12 +96,22 @@ const Repetition = (props) => {
   return (
     <div className='elementdiv'>
       {props.element.elements.map((elem, i) => {
+        const path = [...props.path, i];
         return (
           <div key={''+i}>
-            <div className='elementlabel'>{props.element.typeToRepeat}</div>
+            <div className='elementlabel'>
+              {props.element.typeToRepeat}
+              <span onClick={(e) => {
+                store.dispatch({
+                  type: 'REMOVE_ELEMENT',
+                  path: path
+                });
+              }}
+              > (remove) </span>
+            </div>
             <Field
               element={elem}
-              path={[...props.path, i]}
+              path={path}
             />
           </div>
         )
