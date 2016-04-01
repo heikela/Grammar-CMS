@@ -90,6 +90,7 @@ const Repetition = (props) => {
       {props.element.elements.map((elem, i) => {
         return (
           <div key={''+i}>
+            <div className='elementlabel'>{props.element.typeToRepeat}</div>
             <Field
               element={elem}
               path={[...props.path, i]}
