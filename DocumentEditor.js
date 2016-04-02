@@ -143,6 +143,7 @@ const StringField = (props) => {
           });
         }
       }
+      value={props.element.value}
     />
   );
 }
