@@ -1,5 +1,5 @@
 // Document and element classes
-class Element {
+export class Element {
   updatedAt(path, updateFn) {
     if (path.length !== 0) {
       throw "A basic element does not have sub-elements to update"
