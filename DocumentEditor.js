@@ -25,43 +25,55 @@ import {
   updateImage
 } from './CloudinaryImage';
 
+import { FirebaseStorageProvider } from './FirebaseStorageProvider';
+import { DocumentType } from './DocumentType';
+
 import {
   CLOUDINARY_CLOUD_NAME,
-  CLOUDINARY_UPLOAD_PRESET
+  CLOUDINARY_UPLOAD_PRESET,
+  FIREBASE_REF
 } from './conf';
 
-const grammar = new Grammar(
-  {
-    root: [new SequenceExpansion(['title', 'questions'])],
-    title: [
-      new SequenceExpansion(['titleString']),
-      new SequenceExpansion(['image'])
-    ],
-    image: [new ImageTerm()],
-    questions: [new RepeatExpansion('question')],
-    question: [
-      new SequenceExpansion(['openQuestion']),
-      new SequenceExpansion(['multipleChoiceQuestion']),
-    ],
-    openQuestion: [new SequenceExpansion(['questionPrompt', 'answer'])],
-    multipleChoiceQuestion: [new SequenceExpansion(['questionPrompt', 'answerChoices'])],
-    answerChoices: [new RepeatExpansion('answerOption')],
-    answerOption: [new SequenceExpansion(['answer', 'correctOrNot'])]
-  }
+const quizzes = new DocumentType(
+  new Grammar(
+    {
+      root: [new SequenceExpansion(['title', 'questions'])],
+      title: [
+        new SequenceExpansion(['titleString']),
+        new SequenceExpansion(['image'])
+      ],
+      image: [new ImageTerm()],
+      questions: [new RepeatExpansion('question')],
+      question: [
+        new SequenceExpansion(['openQuestion']),
+        new SequenceExpansion(['multipleChoiceQuestion']),
+      ],
+      openQuestion: [new SequenceExpansion(['questionPrompt', 'answer'])],
+      multipleChoiceQuestion: [new SequenceExpansion(['questionPrompt', 'answerChoices'])],
+      answerChoices: [new RepeatExpansion('answerOption')],
+      answerOption: [new SequenceExpansion(['answer', 'correctOrNot'])]
+    }
+  ),
+  new FirebaseStorageProvider(
+    FIREBASE_REF
+  )
 );
 
-const documentEditor = (oldState = grammar.initDocument(), action) => {
+const documentEditor = (oldState = quizzes.grammar.initDocument(), action) => {
   switch (action.type) {
     case 'ADD_TO_SEQUENCE':
-      return addToRepetition(grammar, oldState, action.path);
+      return addToRepetition(quizzes.grammar, oldState, action.path);
     case 'SELECT_EXPANSION':
-      return selectExpansion(grammar, oldState, action.path, action.selected);
+      return selectExpansion(quizzes.grammar, oldState, action.path, action.selected);
     case 'UPDATED_STRING':
       return updateString(oldState, action.path, action.updatedValue);
     case 'REMOVE_ELEMENT':
       return removeFromRepetition(oldState, action.path);
     case 'IMAGE_UPLOADED':
       return updateImage(oldState, action.path, action.url, action.width, action.height);
+    case 'SAVE_DOCUMENT':
+      quizzes.save(oldState);
+      return oldState;
     default: return oldState;
   }
 }
@@ -74,6 +86,7 @@ const DocumentEditor = (props) => {
       <h1>Edit your new document here</h1>
       <Field {...props} />
       <hr />
+      <button onClick={(e) => {store.dispatch({type:'SAVE_DOCUMENT'})}}>Save Document</button>
       <pre>
         {JSON.stringify(props.element.objectForJson())}
       </pre>
