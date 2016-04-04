@@ -59,8 +59,10 @@ const quizzes = new DocumentType(
   )
 );
 
-const documentEditor = (oldState = quizzes.grammar.initDocument(), action) => {
+const documentEditor = (oldState = null, action) => {
   switch (action.type) {
+    case 'CREATE_DOCUMENT':
+      return quizzes.grammar.initDocument();
     case 'ADD_TO_SEQUENCE':
       return addToRepetition(quizzes.grammar, oldState, action.path);
     case 'SELECT_EXPANSION':
@@ -80,18 +82,51 @@ const documentEditor = (oldState = quizzes.grammar.initDocument(), action) => {
 
 const store = createStore(documentEditor);
 
-const DocumentEditor = (props) => {
+const CMS = (props) => {
   return (
     <div>
-      <h1>Edit your new document here</h1>
-      <Field {...props} />
+      <h1>Create or edit a documet</h1>
+      <Listing />
       <hr />
-      <button onClick={(e) => {store.dispatch({type:'SAVE_DOCUMENT'})}}>Save Document</button>
-      <pre>
-        {JSON.stringify(props.element.objectForJson())}
-      </pre>
+      <DocumentEditor {...props} />
     </div>
-  )
+  );
+}
+
+const Listing = (props) => {
+  return (
+    <div>
+      <button onClick={
+        (e) => {
+          store.dispatch({
+            type: 'CREATE_DOCUMENT'
+          })
+        }
+      }>
+        Create New Document
+      </button>
+    </div>
+  );
+}
+
+const DocumentEditor = (props) => {
+  if (props.element !== null) {
+    return (
+      <div>
+        <h1>Edit your document here</h1>
+        <Field {...props} />
+        <hr />
+        <button onClick={(e) => {store.dispatch({type:'SAVE_DOCUMENT'})}}>Save Document</button>
+        <pre>
+          {JSON.stringify(props.element.objectForJson())}
+        </pre>
+      </div>
+    );
+  } else {
+    return (
+      <div>No Document Loaded</div>
+    );
+  }
 }
 
 /**
@@ -246,7 +281,7 @@ const render = () => {
     path: []
   }
   ReactDOM.render(
-    <DocumentEditor
+    <CMS
       element={store.getState()}
       path={[]}
     />,
