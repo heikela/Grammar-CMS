@@ -1,5 +1,11 @@
 import { randomId } from './util';
 
+import {
+  RepetitionElement,
+  SequenceElement,
+  StringElement
+} from './document';
+
 export class FirebaseStorageProvider {
   constructor(collectionRef) {
     this.collectionRef = collectionRef;
@@ -71,6 +77,34 @@ export class FirebaseStorageProvider {
   }
 
   load(reference, callback) {
-    throw 'not implemented';
+    this.fireBaseRef.child(reference).child('complete').once(
+      'value',
+      (dataSnapshot) => {
+        callback(documentFromDump(dataSnapshot.val()));
+      },
+      (error) => {
+        throw error;
+      }
+    )
   }
+}
+
+const documentFromDump = (document) => {
+  console.log(document);
+  if (document.keys !== undefined) {
+    var elements = {};
+    for (const key of document.keys) {
+      elements[key] = documentFromDump(document.elements[key]);
+    }
+    return new SequenceElement(
+      document.keys,
+      elements
+    );
+  } else if (document.typeToRepeat !== undefined) {
+    const elements = document.elements.map((e) => documentFromDump(e));
+    return new RepetitionElement(document.typeToRepeat, elements);
+  } else {
+    return new StringElement(document.value);
+  }
+  return null;
 }

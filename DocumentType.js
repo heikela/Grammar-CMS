@@ -24,6 +24,9 @@ export class DocumentType {
   }
 
   load(reference) {
-    this.storageProvider.load(reference, (document) => this.store.dispatch('DOCUMENT_LOADED', document));
+    this.storageProvider.load(reference, (document) => this.store.dispatch({
+      type: 'DOCUMENT_LOADED',
+      document: document
+    }));
   }
 }

@@ -50,6 +50,8 @@ const documentEditor = (oldState = null, action) => {
     case 'SAVE_DOCUMENT':
       quizzes.save(oldState);
       return oldState;
+    case 'DOCUMENT_LOADED':
+      return action.document;
     default: return oldState;
   }
 }
