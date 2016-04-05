@@ -7,7 +7,7 @@
     "start": "webpack-dev-server"
   },
   "author": "Mikko Heikelä",
-  "license": "ISC",
+  "license": "MIT",
   "dependencies": {
     "babel-preset-stage-2": "^6.5.0",
     "deep-freeze": "0.0.1",
