@@ -99,7 +99,7 @@ const CMS = (props) => {
   const rootPath = [];
   return (
     <div>
-      <h1>Create or edit a documet</h1>
+      <h1>Create or edit a document</h1>
       <Listing listing={props.listing}/>
       <hr />
       <DocumentEditor element={props.documentEditor} path={rootPath} />
