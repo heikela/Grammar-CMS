@@ -48,11 +48,29 @@ export class FirebaseStorageProvider {
     tryToSave();
   }
 
-  list() {
-    throw 'not implemented';
+  list(callback) {
+    this.fireBaseRef.once(
+      'value',
+      (dataSnapshot) => {
+        var listing = [];
+        dataSnapshot.forEach((documentSnapshot) => {
+          const key = documentSnapshot.key();
+          const title = documentSnapshot.child('json').child('title').val();
+          listing.push({
+            key: key,
+            title: title
+          });
+        });
+        console.log(listing);
+        callback(listing);
+      },
+      (error) => {
+        throw error;
+      }
+    )
   }
 
-  load(reference) {
+  load(reference, callback) {
     throw 'not implemented';
   }
 }

@@ -1,6 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { createStore } from 'redux';
+import { createStore, combineReducers } from 'redux';
 
 import {
   SequenceExpansion,
@@ -33,6 +33,39 @@ import {
   CLOUDINARY_UPLOAD_PRESET,
   FIREBASE_REF
 } from './conf';
+const documentEditor = (oldState = null, action) => {
+  switch (action.type) {
+    case 'CREATE_DOCUMENT':
+      return quizzes.grammar.initDocument();
+    case 'ADD_TO_SEQUENCE':
+      return addToRepetition(quizzes.grammar, oldState, action.path);
+    case 'SELECT_EXPANSION':
+      return selectExpansion(quizzes.grammar, oldState, action.path, action.selected);
+    case 'UPDATED_STRING':
+      return updateString(oldState, action.path, action.updatedValue);
+    case 'REMOVE_ELEMENT':
+      return removeFromRepetition(oldState, action.path);
+    case 'IMAGE_UPLOADED':
+      return updateImage(oldState, action.path, action.url, action.width, action.height);
+    case 'SAVE_DOCUMENT':
+      quizzes.save(oldState);
+      return oldState;
+    default: return oldState;
+  }
+}
+
+const listing = (oldState = [], action) => {
+  switch (action.type) {
+    case 'DOCUMENTS_LISTED':
+      return action.listing;
+    default: return oldState;
+  }
+}
+
+const cms = combineReducers({listing, documentEditor});
+
+const store = createStore(cms);
+
 
 const quizzes = new DocumentType(
   new Grammar(
@@ -56,46 +89,38 @@ const quizzes = new DocumentType(
   ),
   new FirebaseStorageProvider(
     FIREBASE_REF
-  )
+  ),
+  store
 );
 
-const documentEditor = (oldState = null, action) => {
-  switch (action.type) {
-    case 'CREATE_DOCUMENT':
-      return quizzes.grammar.initDocument();
-    case 'ADD_TO_SEQUENCE':
-      return addToRepetition(quizzes.grammar, oldState, action.path);
-    case 'SELECT_EXPANSION':
-      return selectExpansion(quizzes.grammar, oldState, action.path, action.selected);
-    case 'UPDATED_STRING':
-      return updateString(oldState, action.path, action.updatedValue);
-    case 'REMOVE_ELEMENT':
-      return removeFromRepetition(oldState, action.path);
-    case 'IMAGE_UPLOADED':
-      return updateImage(oldState, action.path, action.url, action.width, action.height);
-    case 'SAVE_DOCUMENT':
-      quizzes.save(oldState);
-      return oldState;
-    default: return oldState;
-  }
-}
-
-const store = createStore(documentEditor);
-
 const CMS = (props) => {
+  const rootPath = [];
   return (
     <div>
       <h1>Create or edit a documet</h1>
-      <Listing />
+      <Listing listing={props.listing}/>
       <hr />
-      <DocumentEditor {...props} />
+      <DocumentEditor element={props.documentEditor} path={rootPath} />
     </div>
   );
 }
 
 const Listing = (props) => {
+  console.log(props);
   return (
     <div>
+      {
+        props.listing.map((doc) => {
+          return (
+            <div
+              key={doc.key}
+              onClick={(e) => {quizzes.load(doc.key)}}
+            >
+              {doc.title}
+            </div>
+          );
+        }
+      )}
       <button onClick={
         (e) => {
           store.dispatch({
@@ -282,11 +307,12 @@ const render = () => {
   }
   ReactDOM.render(
     <CMS
-      element={store.getState()}
-      path={[]}
+      {...store.getState()}
     />,
     document.getElementById('app'));
 }
 
 store.subscribe(render);
 render();
+
+quizzes.list();

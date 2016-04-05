@@ -6,9 +6,10 @@
  * is to make the storage provider pluggable.
  */
 export class DocumentType {
-  constructor(grammar, storageProvider) {
+  constructor(grammar, storageProvider, store) {
     this.grammar = grammar,
-    this.storageProvider = storageProvider
+    this.storageProvider = storageProvider,
+    this.store = store
   }
 
   save(document) {
@@ -16,10 +17,13 @@ export class DocumentType {
   }
 
   list() {
-    return this.storageProvider.list();
+    this.storageProvider.list((listing) => this.store.dispatch({
+      type: 'DOCUMENTS_LISTED',
+      listing: listing
+    }));
   }
 
   load(reference) {
-    return this.storageProvider.load(reference);
+    this.storageProvider.load(reference, (document) => this.store.dispatch('DOCUMENT_LOADED', document));
   }
 }
