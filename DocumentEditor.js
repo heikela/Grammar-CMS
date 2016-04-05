@@ -100,6 +100,7 @@ const CMS = (props) => {
   return (
     <div>
       <h1>Create or edit a document</h1>
+      <h2>Existing documents</h2>
       <Listing listing={props.listing}/>
       <hr />
       <DocumentEditor element={props.documentEditor} path={rootPath} />
@@ -141,11 +142,12 @@ const DocumentEditor = (props) => {
     return (
       <div>
         <h1>Edit your document here</h1>
+        <button onClick={(e) => {store.dispatch({type:'SAVE_DOCUMENT'})}}>Save Document</button>
         <Field {...props} />
         <hr />
-        <button onClick={(e) => {store.dispatch({type:'SAVE_DOCUMENT'})}}>Save Document</button>
+        <div>JSON Export</div>
         <pre>
-          {JSON.stringify(props.element.objectForJson())}
+          {JSON.stringify(props.element.objectForJson(),null,' ')}
         </pre>
       </div>
     );
