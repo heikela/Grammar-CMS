@@ -73,18 +73,16 @@ const quizzes = new DocumentType(
   new Grammar(
     {
       root: [new SequenceExpansion(['title', 'questions'])],
-      title: [
-        new SequenceExpansion(['titleString']),
-        new SequenceExpansion(['image'])
-      ],
       image: [new ImageTerm()],
       questions: [new RepeatExpansion('question')],
       question: [
         new SequenceExpansion(['openQuestion']),
         new SequenceExpansion(['multipleChoiceQuestion']),
+        new SequenceExpansion(['questionWithPictureHint'])
       ],
       openQuestion: [new SequenceExpansion(['questionPrompt', 'answer'])],
       multipleChoiceQuestion: [new SequenceExpansion(['questionPrompt', 'answerChoices'])],
+      questionWithPictureHint: [new SequenceExpansion(['questionPrompt', 'image', 'answer'])],
       answerChoices: [new RepeatExpansion('answerOption')],
       answerOption: [new SequenceExpansion(['answer', 'correctOrNot'])]
     }
