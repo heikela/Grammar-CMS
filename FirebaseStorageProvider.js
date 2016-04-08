@@ -3,7 +3,8 @@ import { randomId } from './util';
 import {
   RepetitionElement,
   SequenceElement,
-  StringElement
+  StringElement,
+  IncompleteChoiceElement
 } from './document';
 
 import {
@@ -107,6 +108,8 @@ const documentFromDump = (document) => {
     return new RepetitionElement(document.typeToRepeat, elements);
   } else if (document.url !== undefined) {
     return new ImageElement(document.url, document.width, document.height);
+  } else if (document.alternateExpansions !== undefined) {
+    return new IncompleteChoiceElement(document.alternateExpansions);
   } else {
     return new StringElement(document.value);
   }
@@ -117,6 +120,7 @@ const documentFromDump = (document) => {
 
 import expect from 'expect';
 import deepFreeze from 'deep-freeze';
+import { SequenceExpansion } from './grammar';
 
 const testThatElementGetsRecoveredFromDump = (element) => {
   deepFreeze(element);
@@ -156,5 +160,16 @@ const testReadImageElement = () => {
   testThatElementGetsRecoveredFromDump(element);
 }
 testReadImageElement();
+
+const testReadIncompleteChoiceElement = () => {
+  const element = new IncompleteChoiceElement(
+    [
+      new SequenceExpansion(['expansion1']),
+      new SequenceExpansion(['expansion2a', 'expansion2b'])
+    ]
+  );
+  testThatElementGetsRecoveredFromDump(element);
+}
+testReadIncompleteChoiceElement();
 
 console.log('FirebaseStorageProvider tests pass');
