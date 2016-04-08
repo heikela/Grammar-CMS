@@ -33,6 +33,7 @@ import {
   CLOUDINARY_UPLOAD_PRESET,
   FIREBASE_REF
 } from './conf';
+
 const documentEditor = (oldState = null, action) => {
   switch (action.type) {
     case 'CREATE_DOCUMENT':
