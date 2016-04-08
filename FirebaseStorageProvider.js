@@ -6,6 +6,10 @@ import {
   StringElement
 } from './document';
 
+import {
+  ImageElement
+} from './CloudinaryImage';
+
 export class FirebaseStorageProvider {
   constructor(collectionRef) {
     this.collectionRef = collectionRef;
@@ -106,3 +110,43 @@ const documentFromDump = (document) => {
   }
   return null;
 }
+
+// TESTS
+
+import expect from 'expect';
+import deepFreeze from 'deep-freeze';
+
+const testThatElementGetsRecoveredFromDump = (element) => {
+  deepFreeze(element);
+  expect (
+    documentFromDump(element)
+  ).toEqual(element);
+}
+
+const testReadStringElement = () => {
+  const element = new StringElement('StringValue');
+  testThatElementGetsRecoveredFromDump(element);
+}
+testReadStringElement();
+
+const testReadSequenceElement = () => {
+  const element = new SequenceElement(
+    ['a', 'b'],
+    {
+      a: new StringElement('foo'),
+      b: new StringElement('bar')
+    }
+  );
+  testThatElementGetsRecoveredFromDump(element);
+}
+testReadSequenceElement();
+
+const testReadRepetitionElement = () => {
+  const element = new RepetitionElement(
+    'type',
+    [new StringElement('foo'), new StringElement('bar')]
+  );
+  testThatElementGetsRecoveredFromDump(element);
+}
+
+console.log('FirebaseStorageProvider tests pass');
