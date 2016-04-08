@@ -105,6 +105,8 @@ const documentFromDump = (document) => {
   } else if (document.typeToRepeat !== undefined) {
     const elements = document.elements.map((e) => documentFromDump(e));
     return new RepetitionElement(document.typeToRepeat, elements);
+  } else if (document.url !== undefined) {
+    return new ImageElement(document.url, document.width, document.height);
   } else {
     return new StringElement(document.value);
   }
@@ -148,5 +150,11 @@ const testReadRepetitionElement = () => {
   );
   testThatElementGetsRecoveredFromDump(element);
 }
+
+const testReadImageElement = () => {
+  const element = new ImageElement('http://image.com/url', 1920, 1080);
+  testThatElementGetsRecoveredFromDump(element);
+}
+testReadImageElement();
 
 console.log('FirebaseStorageProvider tests pass');
