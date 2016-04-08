@@ -67,7 +67,6 @@ export class FirebaseStorageProvider {
             title: title
           });
         });
-        console.log(listing);
         callback(listing);
       },
       (error) => {
@@ -90,7 +89,6 @@ export class FirebaseStorageProvider {
 }
 
 const documentFromDump = (document) => {
-  console.log(document);
   if (document.keys !== undefined) {
     var elements = {};
     for (const key of document.keys) {

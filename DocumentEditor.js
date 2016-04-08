@@ -107,7 +107,6 @@ const CMS = (props) => {
 }
 
 const Listing = (props) => {
-  console.log(props);
   return (
     <div>
       {
