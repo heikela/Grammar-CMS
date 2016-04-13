@@ -448,8 +448,17 @@ const ImageField = (props) => {
           )}
         }
       >
-        upload image
+        upload media
       </button>
+    );
+  } else if (props.element.url.slice(-3) === 'mp4') {
+    return (
+      <div>
+        <video width={props.element.width} height={props.element.height} controls>
+          <source src={props.element.url} type="video/mp4" />
+          Your browser does not support the video tag.
+        </video>
+      </div>
     );
   } else {
     return <div><img src={props.element.url} width='200px' height={(props.element.height / props.element.width * 200) + 'px'}/></div>;
