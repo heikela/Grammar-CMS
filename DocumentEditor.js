@@ -1,6 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { createStore, combineReducers } from 'redux';
+import { createStore, combineReducers, applyMiddleware, compose } from 'redux';
 
 import {
   SequenceExpansion,
@@ -34,6 +34,13 @@ import {
   CLOUDINARY_UPLOAD_PRESET,
   FIREBASE_REF
 } from './conf';
+
+import { takeEvery } from 'redux-saga';
+import createSagaMiddleware from 'redux-saga';
+
+import {
+  cps, put
+} from 'redux-saga/effects';
 
 const documentEditor = (oldState = null, action) => {
   switch (action.type) {
@@ -89,10 +96,35 @@ const login = (oldState = {loginStatus:'NOT_LOGGED_IN', user:null, authMessage: 
   }
 }
 
+
+function* fetchListing(action) {
+   try {
+      const listing = yield cps(listQuizzes);
+      yield put({
+        type: 'DOCUMENTS_LISTED',
+        listing: listing
+      });
+   } catch (e) {
+//      yield put({type: "USER_FETCH_FAILED", message: e.message});
+   }
+}
+
+function* listingsAfterLoginSaga() {
+  yield* takeEvery("LOGGED_IN", fetchListing);
+}
+
+function* listingsAfterSaveSaga() {
+  yield* takeEvery("SAVE_DOCUMENT", fetchListing);
+}
+
 const cms = combineReducers({login, listing, documentEditor});
 
-const store = createStore(cms, undefined,
-  window.devToolsExtension ? window.devToolsExtension() : undefined
+const sagaMiddleware = createSagaMiddleware(listingsAfterLoginSaga, listingsAfterSaveSaga);
+
+const store = createStore(cms, undefined, compose(
+    applyMiddleware(sagaMiddleware),
+    window.devToolsExtension ? window.devToolsExtension() : f => f
+  )
 );
 
 const firebaseForCourses = new FirebaseStorageProvider(
@@ -405,7 +437,7 @@ const render = () => {
     document.getElementById('app'));
 }
 
+const listQuizzes = (callback) => {quizzes.list(callback)}
+
 store.subscribe(render);
 render();
-
-quizzes.list();

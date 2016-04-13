@@ -1,5 +1,5 @@
 module.exports = {
-  entry: './DocumentEditor.js',
+  entry: ['babel-polyfill', './DocumentEditor.js'],
   output: {
     path: './',
     filename: 'index.js'

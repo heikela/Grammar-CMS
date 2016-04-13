@@ -84,10 +84,10 @@ export class FirebaseStorageProvider {
             title: title
           });
         });
-        callback(listing);
+        callback(null,listing);
       },
       (error) => {
-        throw error;
+        callback(error, null);
       }
     )
   }

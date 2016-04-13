@@ -16,11 +16,8 @@ export class DocumentType {
     this.storageProvider.save(document);
   }
 
-  list() {
-    this.storageProvider.list((listing) => this.store.dispatch({
-      type: 'DOCUMENTS_LISTED',
-      listing: listing
-    }));
+  list(callback) {
+    this.storageProvider.list(callback);
   }
 
   load(reference) {
