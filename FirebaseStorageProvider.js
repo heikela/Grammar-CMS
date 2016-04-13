@@ -104,7 +104,7 @@ const documentFromDump = (document) => {
       elements
     );
   } else if (document.typeToRepeat !== undefined) {
-    const elements = document.elements.map((e) => documentFromDump(e));
+    const elements = (document.elements !== undefined) ? document.elements.map((e) => documentFromDump(e)) : [];
     return new RepetitionElement(document.typeToRepeat, elements);
   } else if (document.url !== undefined) {
     return new ImageElement(document.url, document.width, document.height);
@@ -125,7 +125,7 @@ import { SequenceExpansion } from './grammar';
 const testThatElementGetsRecoveredFromDump = (element) => {
   deepFreeze(element);
   expect (
-    documentFromDump(element)
+    documentFromDump(JSON.parse(JSON.stringify(element)))
   ).toEqual(element);
 }
 
@@ -154,6 +154,16 @@ const testReadRepetitionElement = () => {
   );
   testThatElementGetsRecoveredFromDump(element);
 }
+testReadRepetitionElement();
+
+const testReadEmptyRepetitionElement = () => {
+  const element = new RepetitionElement(
+    'type',
+    []
+  );
+  testThatElementGetsRecoveredFromDump(element);
+}
+testReadEmptyRepetitionElement();
 
 const testReadImageElement = () => {
   const element = new ImageElement('http://image.com/url', 1920, 1080);
