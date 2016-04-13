@@ -66,10 +66,54 @@ const listing = (oldState = [], action) => {
   }
 }
 
-const cms = combineReducers({listing, documentEditor});
+const login = (oldState = {loginStatus:'NOT_LOGGED_IN', user:null, authMessage: ''}, action) => {
+  switch (action.type) {
+    case 'LOGGED_IN':
+      return {
+        loginStatus:'LOGGED_IN',
+        user: action.user,
+        authMessage: ''
+      };
+    case 'LOGGED_OUT':
+      return {
+        loginStatus:'NOT_LOGGED_IN',
+        user: null,
+        authMessage: ''
+      };
+    case 'AUTH_ERROR':
+      return {
+        ...oldState,
+        authMessage: action.message
+      };
+    default: return oldState;
+  }
+}
+
+const cms = combineReducers({login, listing, documentEditor});
 
 const store = createStore(cms, undefined,
   window.devToolsExtension ? window.devToolsExtension() : undefined
+);
+
+const firebaseForCourses = new FirebaseStorageProvider(
+  FIREBASE_REF,
+  (error, user) => {
+    if (error !== null) {
+      store.dispatch({
+        type: 'AUTH_ERROR',
+        message: "Error authenticating: " + error
+      });
+    } else if (user !== null) {
+      store.dispatch({
+        type: 'LOGGED_IN',
+        user: user
+      });
+    } else {
+      store.dispatch({
+        type: 'LOGGED_OUT'
+      });
+    }
+  }
 );
 
 const quizzes = new DocumentType(
@@ -103,16 +147,48 @@ const quizzes = new DocumentType(
       answerOption: new SequenceExpansion(['answer', 'correctOrNot'])
     }
   ),
-  new FirebaseStorageProvider(
-    FIREBASE_REF
-  ),
+  firebaseForCourses,
   store
 );
+
+const Login = ({login}) => {
+  let emailField;
+  let passwordField;
+  if (login.loginStatus == 'LOGGED_IN') {
+    return (
+      <div>
+        Logged in as {login.user.email}
+        <button onClick={()=>firebaseForCourses.logout()}>Logout</button>
+      </div>
+    );
+  } else {
+    return (
+      <div>
+        <p>Please Login</p>
+        <p>Email</p>
+        <input type="text" ref={node => {emailField = node}}/>
+        <p>Password</p>
+        <input type="password" ref={node => {passwordField = node}}/>
+        <button onClick={
+          (e) => {
+            firebaseForCourses.login(emailField.value, passwordField.value);
+            emailField.value = '';
+            passwordField.value = '';
+          }
+        }>
+          Login
+        </button>
+      </div>
+    );
+  }
+}
 
 const CMS = (props) => {
   const rootPath = [];
   return (
     <div>
+      <Login login={props.login}/>
+      <hr />
       <h1>Create or edit a document</h1>
       <h2>Existing documents</h2>
       <Listing listing={props.listing}/>

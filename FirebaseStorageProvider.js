@@ -12,9 +12,21 @@ import {
 } from './CloudinaryImage';
 
 export class FirebaseStorageProvider {
-  constructor(collectionRef) {
+  constructor(collectionRef, authCallback) {
     this.collectionRef = collectionRef;
     this.fireBaseRef = new Firebase(this.collectionRef);
+    this.authClient = new FirebaseSimpleLogin(this.fireBaseRef, authCallback);
+  }
+
+  logout() {
+    this.authClient.logout();
+  }
+
+  login(username, password) {
+    this.authClient.login('password', {
+      email: username,
+      password: password
+    });
   }
 
   save(document) {
