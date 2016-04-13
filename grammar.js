@@ -43,21 +43,28 @@ export class RepeatExpansion {
   }
 }
 
+export class AlternativesExpansion {
+  constructor(alternativeTerms) {
+    this.alternativeTerms = alternativeTerms;
+  }
+
+  expand(grammar) {
+    return new IncompleteChoiceElement(this.alternativeTerms);
+  }
+}
+
 export class Grammar {
   constructor(rules) {
     this.rules = rules
   }
 
   expandTerm(term) {
-    const applicableRules = this.rules[term];
-    if (applicableRules === undefined) {
+    const applicableRule = this.rules[term];
+    if (applicableRule === undefined) {
       // For now, assume that a term without an expansion is a string terminal
       return new StringElement();
-    } else if (applicableRules.length == 1) {
-      const expansion = applicableRules[0];
-      return expansion.expand(this);
     } else {
-      return new IncompleteChoiceElement(applicableRules);
+      return applicableRule.expand(this);
     }
   }
 
@@ -79,7 +86,7 @@ import {
 
 const testExpandTermForSequenceOfString = () => {
   const grammar = new Grammar({
-    root: [new SequenceExpansion(['A', 'B'])]
+    root: new SequenceExpansion(['A', 'B'])
   });
   deepFreeze(grammar);
   expect(
@@ -98,7 +105,7 @@ testExpandTermForSequenceOfString();
 
 const testExpandTermForRepetition = () => {
   const grammar = new Grammar({
-    root: [new RepeatExpansion('A')]
+    root: new RepeatExpansion('A')
   });
   deepFreeze(grammar);
   expect(
@@ -112,19 +119,22 @@ const testExpandTermForRepetition = () => {
 }
 testExpandTermForRepetition();
 
-const testExpandTermForMultipleExpansions = () => {
-  const expansion1 = new RepeatExpansion('A');
-  const expansion2 = new SequenceExpansion(['A', 'B']);
+const testExpandTermForAlternativesExpansion = () => {
+  const alternative1 = new RepeatExpansion('A');
+  const alternative2 = new SequenceExpansion(['A', 'B']);
   const grammar = new Grammar({
-    root: [expansion1, expansion2]
+    root: new AlternativesExpansion(["alt1", "alt2"]),
+    alt1: alternative1,
+    alt2: alternative2
   });
   deepFreeze(grammar);
-  deepFreeze(expansion1);
-  deepFreeze(expansion2);
+  deepFreeze(alternative1);
+  deepFreeze(alternative2);
+  console.log(grammar);
   expect(
     grammar.expandTerm('root')
-  ).toEqual(new IncompleteChoiceElement([expansion1, expansion2]))
+  ).toEqual(new IncompleteChoiceElement(["alt1", "alt2"]))
 }
-testExpandTermForMultipleExpansions();
+testExpandTermForAlternativesExpansion();
 
 console.log('grammar tests pass');

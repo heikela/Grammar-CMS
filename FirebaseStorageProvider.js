@@ -163,10 +163,7 @@ testReadImageElement();
 
 const testReadIncompleteChoiceElement = () => {
   const element = new IncompleteChoiceElement(
-    [
-      new SequenceExpansion(['expansion1']),
-      new SequenceExpansion(['expansion2a', 'expansion2b'])
-    ]
+    ['expansion1', 'expansion2']
   );
   testThatElementGetsRecoveredFromDump(element);
 }

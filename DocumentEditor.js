@@ -5,6 +5,7 @@ import { createStore, combineReducers } from 'redux';
 import {
   SequenceExpansion,
   RepeatExpansion,
+  AlternativesExpansion,
   Grammar
 } from './grammar';
 
@@ -67,25 +68,39 @@ const listing = (oldState = [], action) => {
 
 const cms = combineReducers({listing, documentEditor});
 
-const store = createStore(cms);
-
+const store = createStore(cms, undefined,
+  window.devToolsExtension ? window.devToolsExtension() : undefined
+);
 
 const quizzes = new DocumentType(
   new Grammar(
     {
-      root: [new SequenceExpansion(['title', 'questions'])],
-      image: [new ImageTerm()],
-      questions: [new RepeatExpansion('question')],
-      question: [
-        new SequenceExpansion(['openQuestion']),
-        new SequenceExpansion(['multipleChoiceQuestion']),
-        new SequenceExpansion(['questionWithPictureHint'])
-      ],
-      openQuestion: [new SequenceExpansion(['questionPrompt', 'answer'])],
-      multipleChoiceQuestion: [new SequenceExpansion(['questionPrompt', 'answerChoices'])],
-      questionWithPictureHint: [new SequenceExpansion(['questionPrompt', 'image', 'answer'])],
-      answerChoices: [new RepeatExpansion('answerOption')],
-      answerOption: [new SequenceExpansion(['answer', 'correctOrNot'])]
+      root: new SequenceExpansion(['title', 'modules']),
+      modules: new RepeatExpansion(['module']),
+      module: new SequenceExpansion(['title', 'steps']),
+      steps: new RepeatExpansion(['step']),
+      step: new SequenceExpansion(['title', 'activities']),
+      activities: new RepeatExpansion(['activity']),
+      activity: new AlternativesExpansion(
+        [
+          'introduction',
+          'video',
+          'quiz',
+          'text'
+        ]
+      ),
+      quiz: new SequenceExpansion(['introScreenText', 'questions']),
+      image: new ImageTerm(),
+      questions: new RepeatExpansion('question'),
+      question: new AlternativesExpansion([
+        'openQuestion',
+        'multipleChoiceQuestion'
+      ]),
+      openQuestion: new SequenceExpansion(['questionPrompt', 'answer']),
+      multipleChoiceQuestion: new SequenceExpansion(['questionPrompt', 'answerChoices']),
+      questionWithPictureHint: new SequenceExpansion(['questionPrompt', 'image', 'answer']),
+      answerChoices: new RepeatExpansion('answerOption'),
+      answerOption: new SequenceExpansion(['answer', 'correctOrNot'])
     }
   ),
   new FirebaseStorageProvider(
