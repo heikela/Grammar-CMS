@@ -197,19 +197,23 @@ const Login = ({login}) => {
     return (
       <div>
         <p>Please Login</p>
-        <p>Email</p>
-        <input type="text" ref={node => {emailField = node}}/>
-        <p>Password</p>
-        <input type="password" ref={node => {passwordField = node}}/>
-        <button onClick={
-          (e) => {
-            firebaseForCourses.login(emailField.value, passwordField.value);
-            emailField.value = '';
-            passwordField.value = '';
-          }
-        }>
-          Login
-        </button>
+        <label>Email:
+          <input type="text" ref={node => {emailField = node}}/>
+        </label>
+        <label>Password:
+          <input type="password" ref={node => {passwordField = node}}/>
+        </label>
+        <div>
+          <button onClick={
+            (e) => {
+              firebaseForCourses.login(emailField.value, passwordField.value);
+              emailField.value = '';
+              passwordField.value = '';
+            }
+          }>
+            Login
+          </button>
+        </div>
       </div>
     );
   }
