@@ -361,6 +361,7 @@ const Repetition = (props) => {
 const StringField = (props) => {
   return (
     <input
+      className='string-field'
       type='text'
       onChange={
         (e) => {
