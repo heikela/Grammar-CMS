@@ -4,6 +4,7 @@ import {
   RepetitionElement,
   SequenceElement,
   StringElement,
+  MultiLineTextElement,
   IncompleteChoiceElement
 } from './document';
 
@@ -122,6 +123,8 @@ const documentFromDump = (document) => {
     return new ImageElement(document.url, document.width, document.height);
   } else if (document.alternateExpansions !== undefined) {
     return new IncompleteChoiceElement(document.alternateExpansions);
+  } else if (document.type === 'MULTILINE_TEXT') {
+    return new MultiLineTextElement(document.value);
   } else {
     return new StringElement(document.value);
   }
@@ -146,6 +149,15 @@ const testReadStringElement = () => {
   testThatElementGetsRecoveredFromDump(element);
 }
 testReadStringElement();
+
+const testReadMultiLineTextElement = () => {
+  const element = new MultiLineTextElement("some\
+text\
+spanning\
+lines");
+  testThatElementGetsRecoveredFromDump(element);
+}
+testReadMultiLineTextElement();
 
 const testReadSequenceElement = () => {
   const element = new SequenceElement(

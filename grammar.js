@@ -53,6 +53,12 @@ export class AlternativesExpansion {
   }
 }
 
+export class MultiLineTextExpansion {
+  expand(grammar) {
+    return new MultiLineTextElement();
+  }
+}
+
 export class Grammar {
   constructor(rules) {
     this.rules = rules
@@ -81,6 +87,7 @@ import {
   SequenceElement,
   RepetitionElement,
   StringElement,
+  MultiLineTextElement,
   IncompleteChoiceElement
 } from './document';
 

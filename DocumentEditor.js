@@ -6,6 +6,7 @@ import {
   SequenceExpansion,
   RepeatExpansion,
   AlternativesExpansion,
+  MultiLineTextExpansion,
   Grammar
 } from './grammar';
 
@@ -168,6 +169,10 @@ const quizzes = new DocumentType(
       ),
       quiz: new SequenceExpansion(['optionalIntroScreenText', 'questions']),
       optionalIntroScreenText: new RepeatExpansion(['introScreenText']),
+      introScreenText: new MultiLineTextExpansion(),
+      text: new MultiLineTextExpansion(),
+      completion: new MultiLineTextExpansion(),
+      introduction: new MultiLineTextExpansion(),
       video: new SequenceExpansion(['introScreenText', 'videoAsset']),
       videoAsset: new ImageTerm(),
       questions: new RepeatExpansion('question'),
@@ -294,6 +299,7 @@ const Field = (props) => {
   switch (props.element.type) {
     case 'SEQUENCE': return Sequence(props);
     case 'STRING': return StringField(props);
+    case 'MULTILINE_TEXT': return MultilineTextField(props);
     case 'REPETITION': return Repetition(props);
     case 'UNKNOWN': return <div>Unknown element</div>;
     case 'INCOMPLETE_CHOICE': return ChoiceToMake(props);
@@ -363,6 +369,24 @@ const StringField = (props) => {
     <input
       className='string-field'
       type='text'
+      onChange={
+        (e) => {
+          store.dispatch({
+            type: 'UPDATED_STRING',
+            path: props.path,
+            updatedValue: e.target.value
+          });
+        }
+      }
+      value={props.element.value}
+    />
+  );
+}
+
+const MultilineTextField = (props) => {
+  return (
+    <textarea
+      className='multiline-text-field'
       onChange={
         (e) => {
           store.dispatch({

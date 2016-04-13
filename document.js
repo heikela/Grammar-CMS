@@ -117,6 +117,25 @@ export class StringElement extends Element {
   }
 }
 
+export class MultiLineTextElement extends Element {
+  constructor(value = '') {
+    super();
+    this.value = value;
+    this.type = 'MULTILINE_TEXT';
+  }
+
+  updated(updatedValue) {
+    return new MultiLineTextElement(updatedValue);
+  }
+
+  objectForJson() {
+    return {
+      type: 'MULTILINE_TEXT',
+      value: this.value
+    }
+  }
+}
+
 export class IncompleteChoiceElement extends Element {
   constructor(alternateExpansions) {
     super();

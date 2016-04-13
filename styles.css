@@ -11,3 +11,8 @@
 .string-field {
   width: 500px;
 }
+
+.multiline-text-field {
+  width: 500px;
+  height: 120px;
+}
