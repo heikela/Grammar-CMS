@@ -153,7 +153,7 @@ const quizzes = new DocumentType(
     {
       root: new SequenceExpansion(['title', 'modules']),
       modules: new RepeatExpansion(['module']),
-      module: new SequenceExpansion(['title', 'steps']),
+      module: new SequenceExpansion(['title', 'steps', 'completion']),
       steps: new RepeatExpansion(['step']),
       step: new SequenceExpansion(['title', 'activities']),
       activities: new RepeatExpansion(['activity']),
@@ -162,21 +162,23 @@ const quizzes = new DocumentType(
           'introduction',
           'video',
           'quiz',
-          'text'
+          'text',
+          'completion'
         ]
       ),
-      quiz: new SequenceExpansion(['introScreenText', 'questions']),
-      image: new ImageTerm(),
+      quiz: new SequenceExpansion(['optionalIntroScreenText', 'questions']),
+      optionalIntroScreenText: new RepeatExpansion(['introScreenText']),
+      video: new SequenceExpansion(['introScreenText', 'videoAsset']),
+      videoAsset: new ImageTerm(),
       questions: new RepeatExpansion('question'),
       question: new AlternativesExpansion([
         'openQuestion',
         'multipleChoiceQuestion'
       ]),
-      openQuestion: new SequenceExpansion(['questionPrompt', 'answer']),
+      openQuestion: new SequenceExpansion(['questionPrompt', 'answer', 'feedback']),
       multipleChoiceQuestion: new SequenceExpansion(['questionPrompt', 'answerChoices']),
-      questionWithPictureHint: new SequenceExpansion(['questionPrompt', 'image', 'answer']),
       answerChoices: new RepeatExpansion('answerOption'),
-      answerOption: new SequenceExpansion(['answer', 'correctOrNot'])
+      answerOption: new SequenceExpansion(['answer', 'correctOrNot', 'feedback'])
     }
   ),
   firebaseForCourses,
