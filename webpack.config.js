@@ -1,8 +1,16 @@
 module.exports = {
-  entry: ['babel-polyfill', './DocumentEditor.js'],
+  entry: {
+    index: [
+      'babel-polyfill',
+      './DocumentEditor.js'
+    ],
+    testBundle: [
+      './documentTest.js'
+    ]
+  },
   output: {
     path: './dist',
-    filename: 'index.js'
+    filename: '[name].js'
   },
   devServer: {
     inline: true,
