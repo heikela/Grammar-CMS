@@ -1,6 +1,6 @@
 import expect from 'expect';
 import deepFreeze from 'deep-freeze';
-import {testCase, runAll} from './trivialRunner';
+import {testCase} from './trivialRunner';
 
 import {
   RepetitionElement,
@@ -176,4 +176,3 @@ const testUpdateStringElement = () => {
 testUpdateStringElement();
 
 console.log('document tests pass');
-runAll();
