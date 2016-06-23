@@ -1,5 +1,6 @@
 import expect from 'expect';
 import deepFreeze from 'deep-freeze';
+import {testCase, runAll} from './trivialRunner';
 
 import {
   RepetitionElement,
@@ -11,31 +12,31 @@ import {
   removeFromRepetition
 } from './document';
 
-const testUpdatedAtForElementInRepetition = () => {
-  const documentBefore = new RepetitionElement(
-    'A',
-    [
-      new StringElement('foo'),
-      new StringElement('bar'),
-      new StringElement('baz')
-    ]
-  )
-  const path = [1];
-  const documentAfter = new RepetitionElement(
-    'A',
-    [
-      new StringElement('foo'),
-      new StringElement('bar2'),
-      new StringElement('baz')
-    ]
-  );
-  deepFreeze(documentBefore);
-  deepFreeze(path);
-  expect(
-    documentBefore.updatedAt(path, (element) => new StringElement(element.value + '2'))
-  ).toEqual(documentAfter);
-}
-testUpdatedAtForElementInRepetition();
+testCase('testUpdatedAtForElementInRepetition', () => {
+    const documentBefore = new RepetitionElement(
+      'A',
+      [
+        new StringElement('foo'),
+        new StringElement('bar'),
+        new StringElement('baz')
+      ]
+    )
+    const path = [1];
+    const documentAfter = new RepetitionElement(
+      'A',
+      [
+        new StringElement('foo1'),
+        new StringElement('bar2'),
+        new StringElement('baz')
+      ]
+    );
+    deepFreeze(documentBefore);
+    deepFreeze(path);
+    expect(
+      documentBefore.updatedAt(path, (element) => new StringElement(element.value + '2'))
+    ).toEqual(documentAfter);
+  }
+);
 
 const testUpdatedAtForElementInSequence = () => {
   const documentBefore = new SequenceElement(
@@ -175,4 +176,4 @@ const testUpdateStringElement = () => {
 testUpdateStringElement();
 
 console.log('document tests pass');
-export var documentTestResult = true;
+runAll();
