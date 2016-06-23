@@ -82,6 +82,7 @@ export class Grammar {
 // Tests
 import expect from 'expect';
 import deepFreeze from 'deep-freeze';
+import {testCase} from './trivialRunner';
 
 import {
   SequenceElement,
@@ -91,57 +92,55 @@ import {
   IncompleteChoiceElement
 } from './document';
 
-const testExpandTermForSequenceOfString = () => {
-  const grammar = new Grammar({
-    root: new SequenceExpansion(['A', 'B'])
-  });
-  deepFreeze(grammar);
-  expect(
-    grammar.expandTerm('root')
-  ).toEqual(
-    new SequenceElement(
-      ['A', 'B'],
-      {
-        A: new StringElement(),
-        B: new StringElement()
-      }
+testCase('testExpandTermForSequenceOfString', () => {
+    const grammar = new Grammar({
+      root: new SequenceExpansion(['A', 'B'])
+    });
+    deepFreeze(grammar);
+    expect(
+      grammar.expandTerm('root')
+    ).toEqual(
+      new SequenceElement(
+        ['A', 'B'],
+        {
+          A: new StringElement(),
+          B: new StringElement()
+        }
+      )
     )
-  )
-}
-testExpandTermForSequenceOfString();
+  }
+);
 
-const testExpandTermForRepetition = () => {
-  const grammar = new Grammar({
-    root: new RepeatExpansion('A')
-  });
-  deepFreeze(grammar);
-  expect(
-    grammar.expandTerm('root')
-  ).toEqual(
-    new RepetitionElement(
-      'A',
-      []
+testCase('testExpandTermForRepetition', () => {
+    const grammar = new Grammar({
+      root: new RepeatExpansion('A')
+    });
+    deepFreeze(grammar);
+    expect(
+      grammar.expandTerm('root')
+    ).toEqual(
+      new RepetitionElement(
+        'A',
+        []
+      )
     )
-  )
-}
-testExpandTermForRepetition();
+  }
+);
 
-const testExpandTermForAlternativesExpansion = () => {
-  const alternative1 = new RepeatExpansion('A');
-  const alternative2 = new SequenceExpansion(['A', 'B']);
-  const grammar = new Grammar({
-    root: new AlternativesExpansion(["alt1", "alt2"]),
-    alt1: alternative1,
-    alt2: alternative2
-  });
-  deepFreeze(grammar);
-  deepFreeze(alternative1);
-  deepFreeze(alternative2);
-  console.log(grammar);
-  expect(
-    grammar.expandTerm('root')
-  ).toEqual(new IncompleteChoiceElement(["alt1", "alt2"]))
-}
-testExpandTermForAlternativesExpansion();
-
-console.log('grammar tests pass');
+testCase('testExpandTermForAlternativesExpansion', () => {
+    const alternative1 = new RepeatExpansion('A');
+    const alternative2 = new SequenceExpansion(['A', 'B']);
+    const grammar = new Grammar({
+      root: new AlternativesExpansion(["alt1", "alt2"]),
+      alt1: alternative1,
+      alt2: alternative2
+    });
+    deepFreeze(grammar);
+    deepFreeze(alternative1);
+    deepFreeze(alternative2);
+    console.log(grammar);
+    expect(
+      grammar.expandTerm('root')
+    ).toEqual(new IncompleteChoiceElement(["alt1", "alt2"]))
+  }
+);

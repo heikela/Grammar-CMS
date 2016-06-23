@@ -25,7 +25,7 @@ testCase('testUpdatedAtForElementInRepetition', () => {
     const documentAfter = new RepetitionElement(
       'A',
       [
-        new StringElement('foo1'),
+        new StringElement('foo'),
         new StringElement('bar2'),
         new StringElement('baz')
       ]
@@ -38,141 +38,139 @@ testCase('testUpdatedAtForElementInRepetition', () => {
   }
 );
 
-const testUpdatedAtForElementInSequence = () => {
-  const documentBefore = new SequenceElement(
-    ['A','B'],
-    {
-      A: new StringElement('foo'),
-      B: new StringElement('bar')
-    }
-  )
-  const path = ['B'];
-  const documentAfter = new SequenceElement(
-    ['A','B'],
-    {
-      A: new StringElement('foo'),
-      B: new StringElement('bar2')
-    }
-  )
-  deepFreeze(documentBefore);
-  deepFreeze(path);
-  expect(
-    documentBefore.updatedAt(path, (element) => new StringElement(element.value + '2'))
-  ).toEqual(documentAfter);
-}
-testUpdatedAtForElementInSequence();
+testCase('testUpdatedAtForElementInSequence', () => {
+    const documentBefore = new SequenceElement(
+      ['A','B'],
+      {
+        A: new StringElement('foo'),
+        B: new StringElement('bar')
+      }
+    )
+    const path = ['B'];
+    const documentAfter = new SequenceElement(
+      ['A','B'],
+      {
+        A: new StringElement('foo'),
+        B: new StringElement('bar2')
+      }
+    )
+    deepFreeze(documentBefore);
+    deepFreeze(path);
+    expect(
+      documentBefore.updatedAt(path, (element) => new StringElement(element.value + '2'))
+    ).toEqual(documentAfter);
+  }
+);
 
 import { Grammar } from './grammar';
 
-const testaddToRepetition = () => {
-  const documentBefore =
-    new SequenceElement(
-      ['title', 'questions'],
+testCase('testaddToRepetition', () => {
+    const documentBefore =
+      new SequenceElement(
+        ['title', 'questions'],
+        {
+          title: new StringElement(),
+          questions:
+            new RepetitionElement(
+              'question',
+              []
+            )
+        }
+      );
+    const grammar = new Grammar({}); // Would it be important for this to be a realistic grammar for the scenario?
+    const documentAfter =
+      new SequenceElement(
+        ['title', 'questions'],
+        {
+          title: new StringElement(),
+          questions:
+            new RepetitionElement(
+              'question',
+              [
+                new StringElement()
+              ]
+            )
+        }
+      );
+    deepFreeze(documentBefore);
+    deepFreeze(grammar);
+
+    expect(
+      addToRepetition(grammar, documentBefore, ['questions'])
+    ).toEqual(documentAfter);
+  }
+);
+
+testCase('testRemoveFromRepetition', () => {
+    const documentBefore =
+      new SequenceElement(
+        ['title', 'questions'],
+        {
+          title: new StringElement(),
+          questions:
+            new RepetitionElement(
+              'question',
+              [
+                new StringElement('zero'),
+                new StringElement('one'),
+                new StringElement('two')
+              ]
+            )
+        }
+      );
+    const documentAfter =
+      new SequenceElement(
+        ['title', 'questions'],
+        {
+          title: new StringElement(),
+          questions:
+            new RepetitionElement(
+              'question',
+              [
+                new StringElement('zero'),
+                new StringElement('two')
+              ]
+            )
+        }
+      );
+    deepFreeze(documentBefore);
+
+    expect(
+      removeFromRepetition(documentBefore, ['questions', 1])
+    ).toEqual(documentAfter);
+  }
+);
+
+testCase('testUpdateStringElement', () => {
+    const documentBefore = new SequenceElement(
+      ['A', 'Bs'],
       {
-        title: new StringElement(),
-        questions:
-          new RepetitionElement(
-            'question',
-            []
-          )
+        A: new StringElement(),
+        Bs: new RepetitionElement(
+          'B',
+          [
+            new StringElement('bar'),
+            new StringElement('foo')
+          ]
+        )
       }
-    );
-  const grammar = new Grammar({}); // Would it be important for this to be a realistic grammar for the scenario?
-  const documentAfter =
-    new SequenceElement(
-      ['title', 'questions'],
+    )
+    const documentAfter = new SequenceElement(
+      ['A', 'Bs'],
       {
-        title: new StringElement(),
-        questions:
-          new RepetitionElement(
-            'question',
-            [
-              new StringElement()
-            ]
-          )
+        A: new StringElement(),
+        Bs: new RepetitionElement(
+          'B',
+          [
+            new StringElement('bar'),
+            new StringElement('fooBar')
+          ]
+        )
       }
-    );
-  deepFreeze(documentBefore);
-  deepFreeze(grammar);
-
-  expect(
-    addToRepetition(grammar, documentBefore, ['questions'])
-  ).toEqual(documentAfter);
-}
-testaddToRepetition();
-
-const testRemoveFromRepetition = () => {
-  const documentBefore =
-    new SequenceElement(
-      ['title', 'questions'],
-      {
-        title: new StringElement(),
-        questions:
-          new RepetitionElement(
-            'question',
-            [
-              new StringElement('zero'),
-              new StringElement('one'),
-              new StringElement('two')
-            ]
-          )
-      }
-    );
-  const documentAfter =
-    new SequenceElement(
-      ['title', 'questions'],
-      {
-        title: new StringElement(),
-        questions:
-          new RepetitionElement(
-            'question',
-            [
-              new StringElement('zero'),
-              new StringElement('two')
-            ]
-          )
-      }
-    );
-  deepFreeze(documentBefore);
-
-  expect(
-    removeFromRepetition(documentBefore, ['questions', 1])
-  ).toEqual(documentAfter);
-}
-testRemoveFromRepetition();
-
-const testUpdateStringElement = () => {
-  const documentBefore = new SequenceElement(
-    ['A', 'Bs'],
-    {
-      A: new StringElement(),
-      Bs: new RepetitionElement(
-        'B',
-        [
-          new StringElement('bar'),
-          new StringElement('foo')
-        ]
-      )
-    }
-  )
-  const documentAfter = new SequenceElement(
-    ['A', 'Bs'],
-    {
-      A: new StringElement(),
-      Bs: new RepetitionElement(
-        'B',
-        [
-          new StringElement('bar'),
-          new StringElement('fooBar')
-        ]
-      )
-    }
-  )
-  deepFreeze(documentBefore)
-  expect(
-    updateString(documentBefore, ['Bs', 1], 'fooBar')
-  ).toEqual(documentAfter);
-}
-testUpdateStringElement();
-
-console.log('document tests pass');
+    )
+    deepFreeze(documentBefore)
+    expect(
+      updateString(documentBefore, ['Bs', 1], 'fooBar')
+    ).toEqual(documentAfter);
+  }
+);
