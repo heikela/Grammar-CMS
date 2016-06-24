@@ -5,6 +5,7 @@ module.exports = {
       './DocumentEditor.js'
     ],
     testBundle: [
+      './trivialReporter',
       './documentTest.js'
     ]
   },

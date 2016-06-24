@@ -1,4 +1,5 @@
 var _testCases = [];
+var _listeners = [];
 
 export const testCase = (name, testFunc) => {
   _testCases.push({
@@ -7,21 +8,57 @@ export const testCase = (name, testFunc) => {
   });
 }
 
+export const INITIATING_TEST = 'INITIATING_TEST';
+export const STARTING_TEST_RUN = 'STARTING_TEST_RUN';
+export const TEST_PASSED = 'TEST_PASSED';
+export const TEST_FAILED = 'TEST_FAILED';
+
+const startingTest = ({name, testFunc}) => ({
+    type: 'INITIATING_TEST',
+    name: name
+});
+
+const pass = ({name, testFunc}) => ({
+    type: 'TEST_PASSED',
+    name: name
+});
+
+const failure = ({name, testFunc}, err) => ({
+    type: 'TEST_FAILED',
+    name: name,
+    err: err
+});
+
+const startingRun = (testNames) => ({
+    type: 'STARTING_TEST_RUN',
+    testNames: testNames
+});
+
+const notifyListeners = (event) => {
+  for (const listener of _listeners) {
+    listener(event);
+  }
+}
+
 export const runAll = () => {
+  notifyListeners(startingRun(_testCases.map((t) => t.name)));
   for (const test of _testCases) {
     const {
       name,
       testFunc
     } = test;
-    console.log('running test case: ' + name);
+    notifyListeners(startingTest(test));
     try {
       testFunc();
-      console.log('completed test case: ' + name);
+      notifyListeners(pass(test));
     } catch (err) {
-      console.log('test case:' + name + ' failed:');
-      console.log(err);
+      notifyListeners(failure(test, err));
     }
   }
+}
+
+export const addListener = (listener) => {
+  _listeners.push(listener)
 }
 
 window.onload = runAll;
