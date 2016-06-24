@@ -1,4 +1,5 @@
 var _testCases = [];
+var _remainingTestsInActiveRun = [];
 var _listeners = [];
 
 export const testCase = (name, testFunc) => {
@@ -40,20 +41,23 @@ const notifyListeners = (event) => {
   }
 }
 
+const runNextTest = () => {
+  const test = _remainingTestsInActiveRun.shift();
+  const testFunc = test.testFunc;
+  notifyListeners(startingTest(test));
+  try {
+    testFunc();
+    notifyListeners(pass(test));
+  } catch (err) {
+    notifyListeners(failure(test, err));
+  }
+}
+
 export const runAll = () => {
   notifyListeners(startingRun(_testCases.map((t) => t.name)));
-  for (const test of _testCases) {
-    const {
-      name,
-      testFunc
-    } = test;
-    notifyListeners(startingTest(test));
-    try {
-      testFunc();
-      notifyListeners(pass(test));
-    } catch (err) {
-      notifyListeners(failure(test, err));
-    }
+  _remainingTestsInActiveRun = _testCases.slice(0);
+  while (_remainingTestsInActiveRun.length > 0) {
+    runNextTest();
   }
 }
 
