@@ -65,7 +65,7 @@ const render = () => {
     <TestReport
       {...props}
     />,
-    document.getElementById('app'));
+    document.getElementById('testResults'));
 }
 
 store.subscribe(render);
