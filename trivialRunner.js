@@ -53,12 +53,21 @@ const runNextTest = () => {
   }
 }
 
+const runNextTestOrFinish = () => {
+  if (_remainingTestsInActiveRun.length > 0) {
+    runNextTest();
+    continueTestRun();
+  }
+}
+
+const continueTestRun = () => {
+  window.setTimeout(runNextTestOrFinish, 0);
+}
+
 export const runAll = () => {
   notifyListeners(startingRun(_testCases.map((t) => t.name)));
   _remainingTestsInActiveRun = _testCases.slice(0);
-  while (_remainingTestsInActiveRun.length > 0) {
-    runNextTest();
-  }
+  continueTestRun();
 }
 
 export const addListener = (listener) => {
