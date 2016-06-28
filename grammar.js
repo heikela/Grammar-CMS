@@ -138,7 +138,6 @@ testCase('testExpandTermForAlternativesExpansion', () => {
     deepFreeze(grammar);
     deepFreeze(alternative1);
     deepFreeze(alternative2);
-    console.log(grammar);
     expect(
       grammar.expandTerm('root')
     ).toEqual(new IncompleteChoiceElement(["alt1", "alt2"]))
