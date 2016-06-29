@@ -50,6 +50,19 @@ const store = createStore(reportingStore, undefined,
   window.devToolsExtension && window.devToolsExtension()
 );
 
+const statusTextColor = (status) => {
+  switch (status) {
+    case 'TEST_PASSED': return 'lime';
+    case 'TEST_FAILED': return 'red';
+    default: return 'black';
+  }
+}
+
+const StatusText = (props) => {
+  const color = statusTextColor(props.status);
+  return <span style={{color:color}}>{props.status}</span>;
+}
+
 export const TestReport = (props) => {
   return (
     <div>
@@ -57,7 +70,7 @@ export const TestReport = (props) => {
       <p>Test run started at: {props.startTime.toString()}</p>
       {props.tests.map((test) => {
         return (
-          <ul key={test.name}>{test.name} - {test.status}</ul>
+          <ul key={test.name}>{test.name} - <StatusText status={test.status} /></ul>
         );
       })}
     </div>
