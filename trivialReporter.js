@@ -21,6 +21,7 @@ const updateTestStatus = (testList, testName, newStatus) => {
 const reportingStore = (state = {tests: []}, action) => {
   switch (action.type) {
     case STARTING_TEST_RUN: return {
+      startTime: new Date(),
       tests: action.testNames.map((testName) => (
           {
             name: testName,
@@ -30,12 +31,15 @@ const reportingStore = (state = {tests: []}, action) => {
       )
     };
     case INITIATING_TEST: return {
+      startTime: state.startTime,
       tests: updateTestStatus(state.tests, action.name, 'RUNNING')
     };
     case TEST_PASSED: return {
+      startTime: state.startTime,
       tests: updateTestStatus(state.tests, action.name, 'TEST_PASSED')
     };
     case TEST_FAILED: return {
+      startTime: state.startTime,
       tests: updateTestStatus(state.tests, action.name, 'TEST_FAILED')
     };
     default: return state;
@@ -50,6 +54,7 @@ export const TestReport = (props) => {
   return (
     <div>
       <h1>Test Results</h1>
+      <p>Test run started at: {props.startTime.toString()}</p>
       {props.tests.map((test) => {
         return (
           <ul key={test.name}>{test.name} - {test.status}</ul>
