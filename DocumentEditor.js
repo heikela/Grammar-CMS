@@ -1,6 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { createStore, combineReducers, applyMiddleware, compose } from 'redux';
+import { createStore, applyMiddleware, compose } from 'redux';
+import thenify from 'thenify';
 
 import {
   SequenceExpansion,
@@ -36,12 +37,7 @@ import {
   FIREBASE_REF
 } from './conf';
 
-import { takeEvery } from 'redux-saga';
-import createSagaMiddleware from 'redux-saga';
-
-import {
-  cps, put
-} from 'redux-saga/effects';
+import { install, loop, Effects, combineReducers } from 'redux-loop';
 
 const documentEditor = (oldState = null, action) => {
   switch (action.type) {
@@ -59,7 +55,10 @@ const documentEditor = (oldState = null, action) => {
       return updateImage(oldState, action.path, action.url, action.width, action.height);
     case 'SAVE_DOCUMENT':
       quizzes.save(oldState);
-      return oldState;
+      return loop(
+        oldState,
+        Effects.promise(fetchListing)
+      );
     case 'DOCUMENT_LOADED':
       return action.document;
     default: return oldState;
@@ -77,11 +76,14 @@ const listing = (oldState = [], action) => {
 const login = (oldState = {loginStatus:'NOT_LOGGED_IN', user:null, authMessage: ''}, action) => {
   switch (action.type) {
     case 'LOGGED_IN':
-      return {
-        loginStatus:'LOGGED_IN',
-        user: action.user,
-        authMessage: ''
-      };
+      return loop(
+        {
+          loginStatus:'LOGGED_IN',
+          user: action.user,
+          authMessage: ''
+        },
+        Effects.promise(fetchListing)
+      );
     case 'LOGGED_OUT':
       return {
         loginStatus:'NOT_LOGGED_IN',
@@ -98,35 +100,31 @@ const login = (oldState = {loginStatus:'NOT_LOGGED_IN', user:null, authMessage: 
 }
 
 
-function* fetchListing(action) {
-   try {
-      const listing = yield cps(listQuizzes);
-      yield put({
+function fetchListing() {
+  var p = thenify(listQuizzes);
+  return p().then((listing) => {
+      return {
         type: 'DOCUMENTS_LISTED',
         listing: listing
-      });
-   } catch (e) {
-//      yield put({type: "USER_FETCH_FAILED", message: e.message});
-   }
-}
-
-function* listingsAfterLoginSaga() {
-  yield* takeEvery("LOGGED_IN", fetchListing);
-}
-
-function* listingsAfterSaveSaga() {
-  yield* takeEvery("SAVE_DOCUMENT", fetchListing);
+      };
+    }
+  ).catch((e) => {
+      return {
+        type: 'DOCUMENT_LISTING_FAILED',
+        message: e.message
+      }
+    }
+  );
 }
 
 const cms = combineReducers({login, listing, documentEditor});
 
-const sagaMiddleware = createSagaMiddleware(listingsAfterLoginSaga, listingsAfterSaveSaga);
-
-const store = createStore(cms, undefined, compose(
-    applyMiddleware(sagaMiddleware),
-    window.devToolsExtension ? window.devToolsExtension() : f => f
-  )
+const enhancer = compose(
+  install(),
+  window.devToolsExtension ? window.devToolsExtension() : f => f
 );
+
+const store = createStore(cms, undefined, enhancer);
 
 const firebaseForCourses = new FirebaseStorageProvider(
   FIREBASE_REF,

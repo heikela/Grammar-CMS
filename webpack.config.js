@@ -1,8 +1,7 @@
 module.exports = {
   entry: {
     index: [
-      'babel-polyfill',
-      './DocumentEditor.js'
+      './DocumentManager.js'
     ],
     tests: [
       './trivialReporter',
