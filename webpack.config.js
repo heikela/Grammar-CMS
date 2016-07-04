@@ -4,7 +4,7 @@ module.exports = {
       'babel-polyfill',
       './DocumentEditor.js'
     ],
-    testBundle: [
+    tests: [
       './trivialReporter',
       './documentTest.js'
     ]
@@ -15,6 +15,7 @@ module.exports = {
   },
   devServer: {
     inline: true,
+    hot: false,
     port: 3334
   },
   module: {
