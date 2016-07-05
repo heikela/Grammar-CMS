@@ -2,7 +2,7 @@ import React, { PropTypes } from 'react';
 import ReactDOM from 'react-dom';
 import { createStore, compose } from 'redux';
 import thenify from 'thenify';
-import { Provider } from 'react-redux';
+import { Provider, connect } from 'react-redux';
 
 require('./styles.css');
 
@@ -13,14 +13,45 @@ import {
 } from './conf';
 
 import { documentEditor, DocumentEditor } from './DocumentEditor';
-import { quizzes, initQuizzes } from './Quizzes';
 
 import { install, loop, Effects, combineReducers } from 'redux-loop';
 
-function fetchListing() {
-  /* eslint-disable no-use-before-define */
-  var p = thenify(listQuizzes);
-  /* eslint-enable no-use-before-define */
+const firebaseForCourses = new FirebaseStorageProvider(FIREBASE_REF);
+
+const loadDocument = (reference) => {
+  const p = thenify((ref, callback) => {firebaseForCourses.load(ref, callback);});
+  return p(reference).then((document) => {
+      return {
+        type: 'DOCUMENT_LOADED',
+        document: document
+      };
+    }
+  ).catch((e) => {
+      return {
+        type: 'DOCUMENT_LOAD_FAILED',
+        error: e
+      };
+    }
+  );
+};
+
+const saveDocument = (document) => {
+  const p = thenify((doc, callback) => {firebaseForCourses.save(doc, callback);});
+  return p(document).then(() => {
+      return {
+        type: 'DOCUMENT_SAVED'
+      };
+    }
+  ).catch(() => {
+      return {
+        type: 'SAVING_DOCUMENT_FAILED'
+      };
+    }
+  );
+};
+
+const fetchListing = () => {
+  const p = thenify((callback) => {firebaseForCourses.list(callback);});
   return p().then((result) => {
       return {
         type: 'DOCUMENTS_LISTED',
@@ -34,17 +65,27 @@ function fetchListing() {
       };
     }
   );
-}
+};
 
 const listing = (oldState = [], action) => {
   switch (action.type) {
     case 'SAVE_DOCUMENT':
       return loop(
         oldState,
+        Effects.promise(saveDocument, action.doc)
+      );
+    case 'DOCUMENT_SAVED':
+      return loop(
+        oldState,
         Effects.promise(fetchListing)
       );
     case 'DOCUMENTS_LISTED':
       return action.listing;
+    case 'LOAD_DOCUMENT':
+      return loop(
+        oldState,
+        Effects.promise(loadDocument, action.ref)
+      );
     default: return oldState;
   }
 };
@@ -85,8 +126,7 @@ const enhancer = compose(
 
 const store = createStore(cms, undefined, enhancer);
 
-const firebaseForCourses = new FirebaseStorageProvider(
-  FIREBASE_REF,
+firebaseForCourses.initAuthClient(
   (error, user) => {
     if (error !== null) {
       store.dispatch({
@@ -168,10 +208,7 @@ CMS.propTypes = {
   listing: PropTypes.array.isRequired
 };
 
-initQuizzes(firebaseForCourses, store);
-const quizDocumentType = quizzes();
-
-const Listing = (props) => {
+const ListingPresentational = (props) => {
   return (
     <div>
       {
@@ -179,7 +216,7 @@ const Listing = (props) => {
           return (
             <div
               key={doc.key}
-              onClick={() => {quizDocumentType.load(doc.key);}}
+              onClick={() => {props.requestLoadDocument(doc.key);}}
             >
               {doc.title}
             </div>
@@ -198,9 +235,21 @@ const Listing = (props) => {
     </div>
   );
 };
-Listing.propTypes = {
-  listing: PropTypes.array.isRequired
+ListingPresentational.propTypes = {
+  listing: PropTypes.array.isRequired,
+  requestLoadDocument: PropTypes.func.isRequired
 };
+
+const mapDispatchToPropsForListing = (dispatch) => {
+  return {
+    requestLoadDocument: (ref) => dispatch({type: 'LOAD_DOCUMENT', ref: ref})
+  };
+};
+
+const Listing = connect(
+  null,
+  mapDispatchToPropsForListing
+)(ListingPresentational);
 
 const render = () => {
   ReactDOM.render(
@@ -211,8 +260,6 @@ const render = () => {
     </Provider>,
     document.getElementById('app'));
 };
-
-const listQuizzes = (callback) => {quizDocumentType.list(callback);};
 
 store.subscribe(render);
 render();

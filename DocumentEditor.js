@@ -1,5 +1,6 @@
 import React, { PropTypes } from 'react';
 import { connect } from 'react-redux';
+import { Effects, loop } from 'redux-loop';
 
 import {
   addToRepetition,
@@ -22,23 +23,32 @@ import {
   CLOUDINARY_UPLOAD_PRESET
 } from './conf';
 
+const saveDocument = (document) => (
+  {
+    type: 'SAVE_DOCUMENT',
+    doc: document
+  }
+);
+
 export const documentEditor = (oldState = null, action) => {
   switch (action.type) {
     case 'CREATE_DOCUMENT':
-      return quizzes().grammar.initDocument();
+      return quizzes.initDocument();
     case 'ADD_TO_SEQUENCE':
-      return addToRepetition(quizzes().grammar, oldState, action.path);
+      return addToRepetition(quizzes, oldState, action.path);
     case 'SELECT_EXPANSION':
-      return selectExpansion(quizzes().grammar, oldState, action.path, action.selected);
+      return selectExpansion(quizzes, oldState, action.path, action.selected);
     case 'UPDATED_STRING':
       return updateString(oldState, action.path, action.updatedValue);
     case 'REMOVE_ELEMENT':
       return removeFromRepetition(oldState, action.path);
     case 'IMAGE_UPLOADED':
       return updateImage(oldState, action.path, action.url, action.width, action.height);
-    case 'SAVE_DOCUMENT':
-      quizzes().save(oldState);
-      return oldState;
+    case 'REQUEST_SAVE_DOCUMENT':
+      return loop(
+        oldState,
+        Effects.constant(saveDocument(oldState))
+      );
     case 'DOCUMENT_LOADED':
       return action.document;
     default: return oldState;
@@ -54,7 +64,7 @@ const mapStateToProps = (state) => {
 
 const mapDispatchToProps = (dispatch) => {
   return {
-    save: () => dispatch({type: 'SAVE_DOCUMENT'}),
+    save: () => dispatch({type: 'REQUEST_SAVE_DOCUMENT'}),
     dispatch: dispatch
   };
 };

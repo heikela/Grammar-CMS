@@ -2,9 +2,12 @@ import { randomId } from './util';
 import { serialize, deSerialize } from './documentSerialization';
 
 export class FirebaseStorageProvider {
-  constructor(collectionRef, authCallback) {
+  constructor(collectionRef) {
     this.collectionRef = collectionRef;
     this.fireBaseRef = new Firebase(this.collectionRef);
+  }
+
+  initAuthClient(authCallback) {
     this.authClient = new FirebaseSimpleLogin(this.fireBaseRef, authCallback);
   }
 
@@ -19,7 +22,7 @@ export class FirebaseStorageProvider {
     });
   }
 
-  save(document) {
+  save(document, callback) {
     var attemptsRemaining = 4;
     const tryToSave = () => {
       const potentialId = randomId();
@@ -46,14 +49,14 @@ export class FirebaseStorageProvider {
             }
             if (attemptsRemaining > 0) {
               console.log('trying again');
+              /* eslint-enable no-console */
               attemptsRemaining = attemptsRemaining - 1;
               tryToSave();
             } else {
-              console.log('gave up trying to save the documet');
+              callback('gave up trying to save the documet', null);
             }
           } else {
-            console.log('Document Saved');
-            /* eslint-enable no-console */
+            callback(null, 'Document Saved');
           }
         }
       );
@@ -86,10 +89,10 @@ export class FirebaseStorageProvider {
     this.fireBaseRef.child(reference).child('complete').once(
       'value',
       (dataSnapshot) => {
-        callback(deSerialize(dataSnapshot.val()));
+        callback(null, deSerialize(dataSnapshot.val()));
       },
       (error) => {
-        throw error;
+        callback(error, null);
       }
     );
   }
