@@ -17,6 +17,7 @@ import { documentEditor, DocumentEditor } from './DocumentEditor';
 import { install, loop, Effects, combineReducers } from 'redux-loop';
 
 const firebaseForCourses = new FirebaseStorageProvider(FIREBASE_REF);
+import { login, Login } from './Login';
 
 const loadDocument = (reference) => {
   const p = thenify((ref, callback) => {firebaseForCourses.load(ref, callback);});
@@ -74,6 +75,7 @@ const listing = (oldState = [], action) => {
         oldState,
         Effects.promise(saveDocument, action.doc)
       );
+    case 'LIST_DOCUMENTS':
     case 'DOCUMENT_SAVED':
       return loop(
         oldState,
@@ -89,33 +91,6 @@ const listing = (oldState = [], action) => {
     default: return oldState;
   }
 };
-
-const login = (oldState = {loginStatus: 'NOT_LOGGED_IN', user: null, authMessage: ''}, action) => {
-  switch (action.type) {
-    case 'LOGGED_IN':
-      return loop(
-        {
-          loginStatus: 'LOGGED_IN',
-          user: action.user,
-          authMessage: ''
-        },
-        Effects.promise(fetchListing)
-      );
-    case 'LOGGED_OUT':
-      return {
-        loginStatus: 'NOT_LOGGED_IN',
-        user: null,
-        authMessage: ''
-      };
-    case 'AUTH_ERROR':
-      return {
-        ...oldState,
-        authMessage: action.message
-      };
-    default: return oldState;
-  }
-};
-
 
 const cms = combineReducers({login, listing, documentEditor});
 
@@ -146,66 +121,21 @@ firebaseForCourses.initAuthClient(
   }
 );
 
-/* eslint-disable no-shadow */
-const Login = ({login}) => {
-  /* eslint-enable no-shadow */
-  let emailField;
-  let passwordField;
-  if (login.loginStatus === 'LOGGED_IN') {
-    return (
-      <div>
-        Logged in as {login.user.email}
-        <button onClick={()=>firebaseForCourses.logout()}>Logout</button>
-      </div>
-    );
-  } else {
-    return (
-      <div>
-        <p>Please Login</p>
-        <label>Email:
-          <input type="text" ref={node => {emailField = node;}}/>
-        </label>
-        <label>Password:
-          <input type="password" ref={node => {passwordField = node;}}/>
-        </label>
-        <div>
-          <button onClick={
-            () => {
-              firebaseForCourses.login(emailField.value, passwordField.value);
-              emailField.value = '';
-              passwordField.value = '';
-            }
-          }>
-            Login
-          </button>
-        </div>
-      </div>
-    );
-  }
-};
-Login.propTypes = {
-  login: PropTypes.shape({
-    loginStatus: PropTypes.string.isRequired,
-    user: PropTypes.object
-  })
-};
-
-const CMS = (props) => {
+const CMS = () => {
   return (
     <div>
-      <Login login={props.login}/>
+      <Login
+        doLogin={(username, password) => firebaseForCourses.login(username, password)}
+        logout={() => firebaseForCourses.logout()}
+      />
       <hr />
       <h1>Create or edit a document</h1>
       <h2>Existing documents</h2>
-      <Listing listing={props.listing}/>
+      <Listing />
       <hr />
       <DocumentEditor />
     </div>
   );
-};
-CMS.propTypes = {
-  login: PropTypes.object.isRequired,
-  listing: PropTypes.array.isRequired
 };
 
 const ListingPresentational = (props) => {
@@ -240,6 +170,12 @@ ListingPresentational.propTypes = {
   requestLoadDocument: PropTypes.func.isRequired
 };
 
+const mapStateToPropsForListing = (state) => {
+  return {
+    listing: state.listing
+  };
+};
+
 const mapDispatchToPropsForListing = (dispatch) => {
   return {
     requestLoadDocument: (ref) => dispatch({type: 'LOAD_DOCUMENT', ref: ref})
@@ -247,16 +183,14 @@ const mapDispatchToPropsForListing = (dispatch) => {
 };
 
 const Listing = connect(
-  null,
+  mapStateToPropsForListing,
   mapDispatchToPropsForListing
 )(ListingPresentational);
 
 const render = () => {
   ReactDOM.render(
     <Provider store={store}>
-      <CMS
-        {...store.getState()}
-      />
+      <CMS />
     </Provider>,
     document.getElementById('app'));
 };
