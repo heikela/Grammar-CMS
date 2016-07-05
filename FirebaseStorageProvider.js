@@ -1,40 +1,5 @@
 import { randomId } from './util';
-
-import {
-  RepetitionElement,
-  SequenceElement,
-  StringElement,
-  MultiLineTextElement,
-  IncompleteChoiceElement
-} from './document';
-
-import {
-  ImageElement
-} from './CloudinaryImage';
-
-const documentFromDump = (document) => {
-  if (document.keys !== undefined) {
-    var elements = {};
-    for (const key of document.keys) {
-      elements[key] = documentFromDump(document.elements[key]);
-    }
-    return new SequenceElement(
-      document.keys,
-      elements
-    );
-  } else if (document.typeToRepeat !== undefined) {
-    const elems = (document.elements !== undefined) ? document.elements.map((e) => documentFromDump(e)) : [];
-    return new RepetitionElement(document.typeToRepeat, elems);
-  } else if (document.url !== undefined) {
-    return new ImageElement(document.url, document.width, document.height);
-  } else if (document.alternateExpansions !== undefined) {
-    return new IncompleteChoiceElement(document.alternateExpansions);
-  } else if (document.type === 'MULTILINE_TEXT') {
-    return new MultiLineTextElement(document.value);
-  } else {
-    return new StringElement(document.value);
-  }
-};
+import { serialize, deSerialize } from './documentSerialization';
 
 export class FirebaseStorageProvider {
   constructor(collectionRef, authCallback) {
@@ -64,7 +29,7 @@ export class FirebaseStorageProvider {
           if (existingData === null) {
             return {
               json: document.objectForJson(),
-              complete: document
+              complete: serialize(document)
             };
           } else {
             /* eslint-disable no-console */
@@ -121,7 +86,7 @@ export class FirebaseStorageProvider {
     this.fireBaseRef.child(reference).child('complete').once(
       'value',
       (dataSnapshot) => {
-        callback(documentFromDump(dataSnapshot.val()));
+        callback(deSerialize(dataSnapshot.val()));
       },
       (error) => {
         throw error;
@@ -129,80 +94,3 @@ export class FirebaseStorageProvider {
     );
   }
 }
-
-// TESTS
-
-import expect from 'expect';
-import deepFreeze from 'deep-freeze';
-
-const testThatElementGetsRecoveredFromDump = (element) => {
-  deepFreeze(element);
-  expect(
-    documentFromDump(JSON.parse(JSON.stringify(element)))
-  ).toEqual(element);
-};
-
-const testReadStringElement = () => {
-  const element = new StringElement('StringValue');
-  testThatElementGetsRecoveredFromDump(element);
-};
-testReadStringElement();
-
-const testReadMultiLineTextElement = () => {
-  /* eslint-disable quotes,no-multi-str */
-  const element = new MultiLineTextElement("some\
-text\
-spanning\
-lines");
-/* eslint-enable quotes,no-multi-str */
-  testThatElementGetsRecoveredFromDump(element);
-};
-testReadMultiLineTextElement();
-
-const testReadSequenceElement = () => {
-  const element = new SequenceElement(
-    ['a', 'b'],
-    {
-      a: new StringElement('foo'),
-      b: new StringElement('bar')
-    }
-  );
-  testThatElementGetsRecoveredFromDump(element);
-};
-testReadSequenceElement();
-
-const testReadRepetitionElement = () => {
-  const element = new RepetitionElement(
-    'type',
-    [new StringElement('foo'), new StringElement('bar')]
-  );
-  testThatElementGetsRecoveredFromDump(element);
-};
-testReadRepetitionElement();
-
-const testReadEmptyRepetitionElement = () => {
-  const element = new RepetitionElement(
-    'type',
-    []
-  );
-  testThatElementGetsRecoveredFromDump(element);
-};
-testReadEmptyRepetitionElement();
-
-const testReadImageElement = () => {
-  const element = new ImageElement('http://image.com/url', 1920, 1080);
-  testThatElementGetsRecoveredFromDump(element);
-};
-testReadImageElement();
-
-const testReadIncompleteChoiceElement = () => {
-  const element = new IncompleteChoiceElement(
-    ['expansion1', 'expansion2']
-  );
-  testThatElementGetsRecoveredFromDump(element);
-};
-testReadIncompleteChoiceElement();
-
-/* eslint-disable no-console */
-console.log('FirebaseStorageProvider tests pass');
-/* eslint-enable no-console */

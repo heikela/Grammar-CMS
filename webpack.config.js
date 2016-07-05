@@ -5,7 +5,8 @@ module.exports = {
     ],
     tests: [
       './trivialReporter',
-      './documentTest.js'
+      './documentTest.js',
+      './documentSerialization.test.js'
     ]
   },
   output: {
