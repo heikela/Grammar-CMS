@@ -7,24 +7,24 @@ export const testCase = (name, testFunc) => {
     name: name,
     testFunc: testFunc
   });
-}
+};
 
 export const INITIATING_TEST = 'INITIATING_TEST';
 export const STARTING_TEST_RUN = 'STARTING_TEST_RUN';
 export const TEST_PASSED = 'TEST_PASSED';
 export const TEST_FAILED = 'TEST_FAILED';
 
-const startingTest = ({name, testFunc}) => ({
+const startingTest = ({name}) => ({
     type: 'INITIATING_TEST',
     name: name
 });
 
-const pass = ({name, testFunc}) => ({
+const pass = ({name}) => ({
     type: 'TEST_PASSED',
     name: name
 });
 
-const failure = ({name, testFunc}, err) => ({
+const failure = ({name}, err) => ({
     type: 'TEST_FAILED',
     name: name,
     err: err
@@ -39,7 +39,7 @@ const notifyListeners = (event) => {
   for (const listener of _listeners) {
     listener(event);
   }
-}
+};
 
 const runNextTest = () => {
   const test = _remainingTestsInActiveRun.shift();
@@ -51,27 +51,29 @@ const runNextTest = () => {
   } catch (err) {
     notifyListeners(failure(test, err));
   }
-}
+};
 
 const runNextTestOrFinish = () => {
   if (_remainingTestsInActiveRun.length > 0) {
     runNextTest();
+    /* eslint-disable no-use-before-define */
     continueTestRun();
+    /* eslint-enable no-use-before-define */
   }
-}
+};
 
 const continueTestRun = () => {
   window.setTimeout(runNextTestOrFinish, 0);
-}
+};
 
 export const runAll = () => {
   notifyListeners(startingRun(_testCases.map((t) => t.name)));
   _remainingTestsInActiveRun = _testCases.slice(0);
   continueTestRun();
-}
+};
 
 export const addListener = (listener) => {
-  _listeners.push(listener)
-}
+  _listeners.push(listener);
+};
 
 window.onload = runAll;

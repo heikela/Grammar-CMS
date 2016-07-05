@@ -1,23 +1,13 @@
 export const NO_IMAGE = 'no_image';
 
-export class ImageTerm {
-  expand(grammar) {
-    return new ImageElement();
-  }
-
-  toString() {
-    return 'image';
-  }
-}
-
 import { Element } from './document';
 
 export class ImageElement extends Element {
-  constructor(url = NO_IMAGE, width=0, height=0) {
+  constructor(url = NO_IMAGE, width = 0, height = 0) {
     super();
     this.url = url;
-    this.width = width,
-    this.height = height
+    this.width = width;
+    this.height = height;
   }
 
   objectForJson() {
@@ -25,7 +15,7 @@ export class ImageElement extends Element {
       url: this.url,
       width: this.width,
       height: this.height
-    }
+    };
   }
 
   updateUrlAndSize(url, width, height) {
@@ -37,9 +27,18 @@ export class ImageElement extends Element {
   }
 }
 
-export const updateImage = (element, path, url, width, height) => {
-  return element.updatedAt(path, (element) => {
-    return element.updateUrlAndSize(url, width, height);
-  });
+export class ImageTerm {
+  expand(/*grammar*/) {
+    return new ImageElement();
+  }
 
+  toString() {
+    return 'image';
+  }
 }
+
+export const updateImage = (element, path, url, width, height) => {
+  return element.updatedAt(path, (el) => {
+    return el.updateUrlAndSize(url, width, height);
+  });
+};

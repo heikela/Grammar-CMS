@@ -7,9 +7,9 @@
  */
 export class DocumentType {
   constructor(grammar, storageProvider, store) {
-    this.grammar = grammar,
-    this.storageProvider = storageProvider,
-    this.store = store
+    this.grammar = grammar;
+    this.storageProvider = storageProvider;
+    this.store = store;
   }
 
   save(document) {

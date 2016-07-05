@@ -1,22 +1,22 @@
-import React from 'react';
+import React, { PropTypes } from 'react';
 import ReactDOM from 'react-dom';
-import { createStore, applyMiddleware } from 'redux';
+import { createStore } from 'redux';
 
 import { addListener, STARTING_TEST_RUN, INITIATING_TEST, TEST_PASSED, TEST_FAILED } from './trivialRunner';
 
 const updateTestStatus = (testList, testName, newStatus) => {
   return testList.map((test) => {
-      if (test.name == testName) {
+      if (test.name === testName) {
         return {
           name: test.name,
           status: newStatus
-        }
+        };
       } else {
         return test;
       }
     }
   );
-}
+};
 
 const reportingStore = (state = {tests: []}, action) => {
   switch (action.type) {
@@ -56,12 +56,15 @@ const statusTextColor = (status) => {
     case 'TEST_FAILED': return 'red';
     default: return 'black';
   }
-}
+};
 
 const StatusText = (props) => {
   const color = statusTextColor(props.status);
-  return <span style={{color:color}}>{props.status}</span>;
-}
+  return <span style={{color: color}}>{props.status}</span>;
+};
+StatusText.propTypes = {
+  status: PropTypes.string.isRequired
+};
 
 export const TestReport = (props) => {
   return (
@@ -75,7 +78,11 @@ export const TestReport = (props) => {
       })}
     </div>
   );
-}
+};
+TestReport.propTypes = {
+  tests: PropTypes.array.isRequired,
+  startTime: PropTypes.object.isRequired
+};
 
 const render = () => {
   const props = store.getState();
@@ -84,7 +91,7 @@ const render = () => {
       {...props}
     />,
     document.getElementById('testResults'));
-}
+};
 
 store.subscribe(render);
 

@@ -1,17 +1,14 @@
-import React from 'react';
+import React, { PropTypes } from 'react';
 import ReactDOM from 'react-dom';
-import { createStore, applyMiddleware, compose } from 'redux';
+import { createStore, compose } from 'redux';
 import thenify from 'thenify';
 import { Provider } from 'react-redux';
 
 require('./styles.css');
 
 import { FirebaseStorageProvider } from './FirebaseStorageProvider';
-import { DocumentType } from './DocumentType';
 
 import {
-  CLOUDINARY_CLOUD_NAME,
-  CLOUDINARY_UPLOAD_PRESET,
   FIREBASE_REF
 } from './conf';
 
@@ -19,6 +16,25 @@ import { documentEditor, DocumentEditor } from './DocumentEditor';
 import { quizzes, initQuizzes } from './Quizzes';
 
 import { install, loop, Effects, combineReducers } from 'redux-loop';
+
+function fetchListing() {
+  /* eslint-disable no-use-before-define */
+  var p = thenify(listQuizzes);
+  /* eslint-enable no-use-before-define */
+  return p().then((result) => {
+      return {
+        type: 'DOCUMENTS_LISTED',
+        listing: result
+      };
+    }
+  ).catch((e) => {
+      return {
+        type: 'DOCUMENT_LISTING_FAILED',
+        message: e.message
+      };
+    }
+  );
+}
 
 const listing = (oldState = [], action) => {
   switch (action.type) {
@@ -31,14 +47,14 @@ const listing = (oldState = [], action) => {
       return action.listing;
     default: return oldState;
   }
-}
+};
 
-const login = (oldState = {loginStatus:'NOT_LOGGED_IN', user:null, authMessage: ''}, action) => {
+const login = (oldState = {loginStatus: 'NOT_LOGGED_IN', user: null, authMessage: ''}, action) => {
   switch (action.type) {
     case 'LOGGED_IN':
       return loop(
         {
-          loginStatus:'LOGGED_IN',
+          loginStatus: 'LOGGED_IN',
           user: action.user,
           authMessage: ''
         },
@@ -46,7 +62,7 @@ const login = (oldState = {loginStatus:'NOT_LOGGED_IN', user:null, authMessage: 
       );
     case 'LOGGED_OUT':
       return {
-        loginStatus:'NOT_LOGGED_IN',
+        loginStatus: 'NOT_LOGGED_IN',
         user: null,
         authMessage: ''
       };
@@ -57,25 +73,8 @@ const login = (oldState = {loginStatus:'NOT_LOGGED_IN', user:null, authMessage: 
       };
     default: return oldState;
   }
-}
+};
 
-
-function fetchListing() {
-  var p = thenify(listQuizzes);
-  return p().then((listing) => {
-      return {
-        type: 'DOCUMENTS_LISTED',
-        listing: listing
-      };
-    }
-  ).catch((e) => {
-      return {
-        type: 'DOCUMENT_LISTING_FAILED',
-        message: e.message
-      }
-    }
-  );
-}
 
 const cms = combineReducers({login, listing, documentEditor});
 
@@ -92,7 +91,7 @@ const firebaseForCourses = new FirebaseStorageProvider(
     if (error !== null) {
       store.dispatch({
         type: 'AUTH_ERROR',
-        message: "Error authenticating: " + error
+        message: 'Error authenticating: ' + error
       });
     } else if (user !== null) {
       store.dispatch({
@@ -107,10 +106,12 @@ const firebaseForCourses = new FirebaseStorageProvider(
   }
 );
 
+/* eslint-disable no-shadow */
 const Login = ({login}) => {
+  /* eslint-enable no-shadow */
   let emailField;
   let passwordField;
-  if (login.loginStatus == 'LOGGED_IN') {
+  if (login.loginStatus === 'LOGGED_IN') {
     return (
       <div>
         Logged in as {login.user.email}
@@ -122,14 +123,14 @@ const Login = ({login}) => {
       <div>
         <p>Please Login</p>
         <label>Email:
-          <input type="text" ref={node => {emailField = node}}/>
+          <input type="text" ref={node => {emailField = node;}}/>
         </label>
         <label>Password:
-          <input type="password" ref={node => {passwordField = node}}/>
+          <input type="password" ref={node => {passwordField = node;}}/>
         </label>
         <div>
           <button onClick={
-            (e) => {
+            () => {
               firebaseForCourses.login(emailField.value, passwordField.value);
               emailField.value = '';
               passwordField.value = '';
@@ -141,7 +142,13 @@ const Login = ({login}) => {
       </div>
     );
   }
-}
+};
+Login.propTypes = {
+  login: PropTypes.shape({
+    loginStatus: PropTypes.string.isRequired,
+    user: PropTypes.object
+  })
+};
 
 const CMS = (props) => {
   return (
@@ -155,7 +162,14 @@ const CMS = (props) => {
       <DocumentEditor />
     </div>
   );
-}
+};
+CMS.propTypes = {
+  login: PropTypes.object.isRequired,
+  listing: PropTypes.array.isRequired
+};
+
+initQuizzes(firebaseForCourses, store);
+const quizDocumentType = quizzes();
 
 const Listing = (props) => {
   return (
@@ -165,7 +179,7 @@ const Listing = (props) => {
           return (
             <div
               key={doc.key}
-              onClick={(e) => {quizDocumentType.load(doc.key)}}
+              onClick={() => {quizDocumentType.load(doc.key);}}
             >
               {doc.title}
             </div>
@@ -173,23 +187,22 @@ const Listing = (props) => {
         }
       )}
       <button onClick={
-        (e) => {
+        () => {
           store.dispatch({
             type: 'CREATE_DOCUMENT'
-          })
+          });
         }
       }>
         Create New Document
       </button>
     </div>
   );
-}
+};
+Listing.propTypes = {
+  listing: PropTypes.array.isRequired
+};
 
 const render = () => {
-  const props = {
-    element: store.getState(),
-    path: []
-  }
   ReactDOM.render(
     <Provider store={store}>
       <CMS
@@ -197,12 +210,9 @@ const render = () => {
       />
     </Provider>,
     document.getElementById('app'));
-}
+};
 
-initQuizzes(firebaseForCourses, store);
-const quizDocumentType = quizzes();
-
-const listQuizzes = (callback) => {quizDocumentType.list(callback)}
+const listQuizzes = (callback) => {quizDocumentType.list(callback);};
 
 store.subscribe(render);
 render();

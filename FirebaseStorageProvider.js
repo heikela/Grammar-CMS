@@ -12,6 +12,30 @@ import {
   ImageElement
 } from './CloudinaryImage';
 
+const documentFromDump = (document) => {
+  if (document.keys !== undefined) {
+    var elements = {};
+    for (const key of document.keys) {
+      elements[key] = documentFromDump(document.elements[key]);
+    }
+    return new SequenceElement(
+      document.keys,
+      elements
+    );
+  } else if (document.typeToRepeat !== undefined) {
+    const elems = (document.elements !== undefined) ? document.elements.map((e) => documentFromDump(e)) : [];
+    return new RepetitionElement(document.typeToRepeat, elems);
+  } else if (document.url !== undefined) {
+    return new ImageElement(document.url, document.width, document.height);
+  } else if (document.alternateExpansions !== undefined) {
+    return new IncompleteChoiceElement(document.alternateExpansions);
+  } else if (document.type === 'MULTILINE_TEXT') {
+    return new MultiLineTextElement(document.value);
+  } else {
+    return new StringElement(document.value);
+  }
+};
+
 export class FirebaseStorageProvider {
   constructor(collectionRef, authCallback) {
     this.collectionRef = collectionRef;
@@ -31,7 +55,6 @@ export class FirebaseStorageProvider {
   }
 
   save(document) {
-    var saved = false;
     var attemptsRemaining = 4;
     const tryToSave = () => {
       const potentialId = randomId();
@@ -39,17 +62,17 @@ export class FirebaseStorageProvider {
       ref.transaction(
         (existingData) => {
           if (existingData === null) {
-            saved
             return {
               json: document.objectForJson(),
               complete: document
             };
           } else {
+            /* eslint-disable no-console */
             console.log('Randomly generated ID was not free.');
-            return; // Abort the transaction.
+            return null; // Abort the transaction.
           }
         },
-        (error, committed, snapshot) => {
+        (error, committed/*, snapshot*/) => {
           if (error || !committed) {
             if (error) {
               console.log('Firebase transaction failed abnormally!', error);
@@ -65,10 +88,11 @@ export class FirebaseStorageProvider {
             }
           } else {
             console.log('Document Saved');
+            /* eslint-enable no-console */
           }
         }
       );
-    }
+    };
     tryToSave();
   }
 
@@ -85,12 +109,12 @@ export class FirebaseStorageProvider {
             title: title
           });
         });
-        callback(null,listing);
+        callback(null, listing);
       },
       (error) => {
         callback(error, null);
       }
-    )
+    );
   }
 
   load(reference, callback) {
@@ -102,61 +126,37 @@ export class FirebaseStorageProvider {
       (error) => {
         throw error;
       }
-    )
-  }
-}
-
-const documentFromDump = (document) => {
-  if (document.keys !== undefined) {
-    var elements = {};
-    for (const key of document.keys) {
-      elements[key] = documentFromDump(document.elements[key]);
-    }
-    return new SequenceElement(
-      document.keys,
-      elements
     );
-  } else if (document.typeToRepeat !== undefined) {
-    const elements = (document.elements !== undefined) ? document.elements.map((e) => documentFromDump(e)) : [];
-    return new RepetitionElement(document.typeToRepeat, elements);
-  } else if (document.url !== undefined) {
-    return new ImageElement(document.url, document.width, document.height);
-  } else if (document.alternateExpansions !== undefined) {
-    return new IncompleteChoiceElement(document.alternateExpansions);
-  } else if (document.type === 'MULTILINE_TEXT') {
-    return new MultiLineTextElement(document.value);
-  } else {
-    return new StringElement(document.value);
   }
-  return null;
 }
 
 // TESTS
 
 import expect from 'expect';
 import deepFreeze from 'deep-freeze';
-import { SequenceExpansion } from './grammar';
 
 const testThatElementGetsRecoveredFromDump = (element) => {
   deepFreeze(element);
-  expect (
+  expect(
     documentFromDump(JSON.parse(JSON.stringify(element)))
   ).toEqual(element);
-}
+};
 
 const testReadStringElement = () => {
   const element = new StringElement('StringValue');
   testThatElementGetsRecoveredFromDump(element);
-}
+};
 testReadStringElement();
 
 const testReadMultiLineTextElement = () => {
+  /* eslint-disable quotes,no-multi-str */
   const element = new MultiLineTextElement("some\
 text\
 spanning\
 lines");
+/* eslint-enable quotes,no-multi-str */
   testThatElementGetsRecoveredFromDump(element);
-}
+};
 testReadMultiLineTextElement();
 
 const testReadSequenceElement = () => {
@@ -168,7 +168,7 @@ const testReadSequenceElement = () => {
     }
   );
   testThatElementGetsRecoveredFromDump(element);
-}
+};
 testReadSequenceElement();
 
 const testReadRepetitionElement = () => {
@@ -177,7 +177,7 @@ const testReadRepetitionElement = () => {
     [new StringElement('foo'), new StringElement('bar')]
   );
   testThatElementGetsRecoveredFromDump(element);
-}
+};
 testReadRepetitionElement();
 
 const testReadEmptyRepetitionElement = () => {
@@ -186,13 +186,13 @@ const testReadEmptyRepetitionElement = () => {
     []
   );
   testThatElementGetsRecoveredFromDump(element);
-}
+};
 testReadEmptyRepetitionElement();
 
 const testReadImageElement = () => {
   const element = new ImageElement('http://image.com/url', 1920, 1080);
   testThatElementGetsRecoveredFromDump(element);
-}
+};
 testReadImageElement();
 
 const testReadIncompleteChoiceElement = () => {
@@ -200,7 +200,9 @@ const testReadIncompleteChoiceElement = () => {
     ['expansion1', 'expansion2']
   );
   testThatElementGetsRecoveredFromDump(element);
-}
+};
 testReadIncompleteChoiceElement();
 
+/* eslint-disable no-console */
 console.log('FirebaseStorageProvider tests pass');
+/* eslint-enable no-console */

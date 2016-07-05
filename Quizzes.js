@@ -18,7 +18,7 @@ export const quizzes = () => {
   } else {
     return _quizzes;
   }
-}
+};
 
 export const initQuizzes = (firebaseForCourses, store) => {
   _quizzes = new DocumentType(
@@ -61,4 +61,4 @@ export const initQuizzes = (firebaseForCourses, store) => {
     firebaseForCourses,
     store
   );
-}
+};

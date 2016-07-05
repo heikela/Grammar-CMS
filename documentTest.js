@@ -6,7 +6,6 @@ import {
   RepetitionElement,
   SequenceElement,
   StringElement,
-  IncompleteChoiceElement,
   addToRepetition,
   updateString,
   removeFromRepetition
@@ -20,7 +19,7 @@ testCase('testUpdatedAtForElementInRepetition', () => {
         new StringElement('bar'),
         new StringElement('baz')
       ]
-    )
+    );
     const path = [1];
     const documentAfter = new RepetitionElement(
       'A',
@@ -40,20 +39,20 @@ testCase('testUpdatedAtForElementInRepetition', () => {
 
 testCase('testUpdatedAtForElementInSequence', () => {
     const documentBefore = new SequenceElement(
-      ['A','B'],
+      ['A', 'B'],
       {
         A: new StringElement('foo'),
         B: new StringElement('bar')
       }
-    )
+    );
     const path = ['B'];
     const documentAfter = new SequenceElement(
-      ['A','B'],
+      ['A', 'B'],
       {
         A: new StringElement('foo'),
         B: new StringElement('bar2')
       }
-    )
+    );
     deepFreeze(documentBefore);
     deepFreeze(path);
     expect(
@@ -154,7 +153,7 @@ testCase('testUpdateStringElement', () => {
           ]
         )
       }
-    )
+    );
     const documentAfter = new SequenceElement(
       ['A', 'Bs'],
       {
@@ -167,8 +166,8 @@ testCase('testUpdateStringElement', () => {
           ]
         )
       }
-    )
-    deepFreeze(documentBefore)
+    );
+    deepFreeze(documentBefore);
     expect(
       updateString(documentBefore, ['Bs', 1], 'fooBar')
     ).toEqual(documentAfter);

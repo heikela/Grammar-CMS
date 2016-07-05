@@ -1,4 +1,10 @@
-// import whyNotEqual from 'is-equal/why';
+import {
+  SequenceElement,
+  RepetitionElement,
+  StringElement,
+  MultiLineTextElement,
+  IncompleteChoiceElement
+} from './document';
 
 // Grammar classes
 export class SequenceExpansion {
@@ -13,7 +19,7 @@ export class SequenceExpansion {
     */
     var elements = {};
     for (let key of this.termSequence) {
-      elements[key] = grammar.expandTerm(key)
+      elements[key] = grammar.expandTerm(key);
     }
     return new SequenceElement(
       this.termSequence,
@@ -31,7 +37,7 @@ export class RepeatExpansion {
     this.termToRepeat = termToRepeat;
   }
 
-  expand(grammar) {
+  expand(/*grammar*/) {
     return new RepetitionElement(
       this.termToRepeat,
       []
@@ -48,20 +54,20 @@ export class AlternativesExpansion {
     this.alternativeTerms = alternativeTerms;
   }
 
-  expand(grammar) {
+  expand(/*grammar*/) {
     return new IncompleteChoiceElement(this.alternativeTerms);
   }
 }
 
 export class MultiLineTextExpansion {
-  expand(grammar) {
+  expand(/*grammar*/) {
     return new MultiLineTextElement();
   }
 }
 
 export class Grammar {
   constructor(rules) {
-    this.rules = rules
+    this.rules = rules;
   }
 
   expandTerm(term) {
@@ -84,14 +90,6 @@ import expect from 'expect';
 import deepFreeze from 'deep-freeze';
 import {testCase} from './trivialRunner';
 
-import {
-  SequenceElement,
-  RepetitionElement,
-  StringElement,
-  MultiLineTextElement,
-  IncompleteChoiceElement
-} from './document';
-
 testCase('testExpandTermForSequenceOfString', () => {
     const grammar = new Grammar({
       root: new SequenceExpansion(['A', 'B'])
@@ -107,7 +105,7 @@ testCase('testExpandTermForSequenceOfString', () => {
           B: new StringElement()
         }
       )
-    )
+    );
   }
 );
 
@@ -123,7 +121,7 @@ testCase('testExpandTermForRepetition', () => {
         'A',
         []
       )
-    )
+    );
   }
 );
 
@@ -131,7 +129,7 @@ testCase('testExpandTermForAlternativesExpansion', () => {
     const alternative1 = new RepeatExpansion('A');
     const alternative2 = new SequenceExpansion(['A', 'B']);
     const grammar = new Grammar({
-      root: new AlternativesExpansion(["alt1", "alt2"]),
+      root: new AlternativesExpansion(['alt1', 'alt2']),
       alt1: alternative1,
       alt2: alternative2
     });
@@ -140,6 +138,6 @@ testCase('testExpandTermForAlternativesExpansion', () => {
     deepFreeze(alternative2);
     expect(
       grammar.expandTerm('root')
-    ).toEqual(new IncompleteChoiceElement(["alt1", "alt2"]))
+    ).toEqual(new IncompleteChoiceElement(['alt1', 'alt2']));
   }
 );

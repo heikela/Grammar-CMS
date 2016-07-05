@@ -1,8 +1,5 @@
-import React from 'react';
-import ReactDOM from 'react-dom';
-import { createStore, applyMiddleware, compose } from 'redux';
+import React, { PropTypes } from 'react';
 import { connect } from 'react-redux';
-import thenify from 'thenify';
 
 import {
   addToRepetition,
@@ -16,18 +13,14 @@ import { quizzes } from './Quizzes';
 require('./styles.css');
 
 import {
-  ImageTerm,
   NO_IMAGE,
   updateImage
 } from './CloudinaryImage';
 
 import {
   CLOUDINARY_CLOUD_NAME,
-  CLOUDINARY_UPLOAD_PRESET,
-  FIREBASE_REF
+  CLOUDINARY_UPLOAD_PRESET
 } from './conf';
-
-import { install, loop, Effects, combineReducers } from 'redux-loop';
 
 export const documentEditor = (oldState = null, action) => {
   switch (action.type) {
@@ -50,33 +43,33 @@ export const documentEditor = (oldState = null, action) => {
       return action.document;
     default: return oldState;
   }
-}
+};
 
 const mapStateToProps = (state) => {
   return {
     element: state.documentEditor,
     path: []
-  }
-}
+  };
+};
 
 const mapDispatchToProps = (dispatch) => {
   return {
-    save: () => dispatch({type:'SAVE_DOCUMENT'}),
+    save: () => dispatch({type: 'SAVE_DOCUMENT'}),
     dispatch: dispatch
-  }
-}
+  };
+};
 
 const DocumentEditorPresentational = (props) => {
   if (props.element !== null) {
     return (
       <div>
         <h1>Edit your document here</h1>
-        <button onClick={(e) => {props.save()}}>Save Document</button>
+        <button onClick={() => {props.save();}}>Save Document</button>
         <Field {...props} />
         <hr />
         <div>JSON Export</div>
         <pre>
-          {JSON.stringify(props.element.objectForJson(),null,' ')}
+          {JSON.stringify(props.element.objectForJson(), null, ' ')}
         </pre>
       </div>
     );
@@ -85,30 +78,20 @@ const DocumentEditorPresentational = (props) => {
       <div>No Document Loaded</div>
     );
   }
-}
+};
+DocumentEditorPresentational.propTypes = {
+  element: PropTypes.object,
+  save: PropTypes.func.isRequired
+};
 
 export const DocumentEditor = connect(
   mapStateToProps,
   mapDispatchToProps
-)(DocumentEditorPresentational)
+)(DocumentEditorPresentational);
 
-/**
- * TODO see if you can make this explicit switch go away nicely.
- * Simply replacing it with OO method dispatch would force document elements
- * to care about presentation
- */
-const Field = (props) => {
-  switch (props.element.type) {
-    case 'SEQUENCE': return Sequence(props);
-    case 'STRING': return StringField(props);
-    case 'MULTILINE_TEXT': return MultilineTextField(props);
-    case 'REPETITION': return Repetition(props);
-    case 'UNKNOWN': return <div>Unknown element</div>;
-    case 'INCOMPLETE_CHOICE': return ChoiceToMake(props);
-    case 'IMAGE': return ImageField(props);
-    default: throw 'element type not understood in renderField()';
-  }
-}
+// functions to render particular types of fields
+
+
 
 const Sequence = (props) => {
   return (
@@ -126,8 +109,16 @@ const Sequence = (props) => {
         );
       })}
     </div>
-  )
-}
+  );
+};
+Sequence.propTypes = {
+  dispatch: PropTypes.func.isRequired,
+  path: PropTypes.array.isRequired,
+  element: PropTypes.shape({
+    keys: PropTypes.array.isRequired,
+    elements: PropTypes.array.isRequired
+  })
+};
 
 const Repetition = (props) => {
   return (
@@ -135,10 +126,10 @@ const Repetition = (props) => {
       {props.element.elements.map((elem, i) => {
         const path = [...props.path, i];
         return (
-          <div key={''+i}>
+          <div key={'' + i}>
             <div className='elementlabel'>
               {props.element.typeToRepeat}
-              <span onClick={(e) => {
+              <span onClick={() => {
                 props.dispatch({
                   type: 'REMOVE_ELEMENT',
                   path: path
@@ -152,21 +143,29 @@ const Repetition = (props) => {
               path={path}
             />
           </div>
-        )
+        );
       })}
       <button
-        onClick={(e) => {
+        onClick={() => {
           props.dispatch({
             type: 'ADD_TO_SEQUENCE',
             path: props.path
-          })
+          });
         }}
       >
         Add Item
       </button>
     </div>
-  )
-}
+  );
+};
+Repetition.propTypes = {
+  dispatch: PropTypes.func.isRequired,
+  path: PropTypes.array.isRequired,
+  element: PropTypes.shape({
+    typeToRepeat: PropTypes.string.isRequired,
+    elements: PropTypes.array.isRequired
+  })
+};
 
 const StringField = (props) => {
   return (
@@ -185,7 +184,14 @@ const StringField = (props) => {
       value={props.element.value}
     />
   );
-}
+};
+StringField.propTypes = {
+  dispatch: PropTypes.func.isRequired,
+  path: PropTypes.array.isRequired,
+  element: PropTypes.shape({
+    value: PropTypes.string.isRequired
+  })
+};
 
 const MultilineTextField = (props) => {
   return (
@@ -203,7 +209,14 @@ const MultilineTextField = (props) => {
       value={props.element.value}
     />
   );
-}
+};
+MultilineTextField.propTypes = {
+  dispatch: PropTypes.func.isRequired,
+  path: PropTypes.array.isRequired,
+  element: PropTypes.shape({
+    value: PropTypes.string.isRequired
+  })
+};
 
 const ChoiceToMake = (props) => {
   return (
@@ -212,7 +225,7 @@ const ChoiceToMake = (props) => {
         type: 'SELECT_EXPANSION',
         path: props.path,
         selected: e.target.value
-      })
+      });
     }}>
       <option id='_not_chosen'>Choose Type</option>
       {
@@ -223,17 +236,27 @@ const ChoiceToMake = (props) => {
       }
     </select>
   );
-}
+};
+
+ChoiceToMake.propTypes = {
+  dispatch: PropTypes.func.isRequired,
+  path: PropTypes.array.isRequired,
+  element: PropTypes.shape({
+    alternateExpansions: PropTypes.array.isRequired
+  })
+};
 
 const ImageField = (props) => {
   if (props.element.url === NO_IMAGE) {
     return (
       <button
         onClick={
-          (e) => {
+          () => {
             cloudinary.openUploadWidget({
+              /* eslint-disable camelcase */
               cloud_name: CLOUDINARY_CLOUD_NAME,
               upload_preset: CLOUDINARY_UPLOAD_PRESET
+              /* eslint-enable camelcase */
             },
             (error, result) => {
               if (error === null) {
@@ -246,10 +269,12 @@ const ImageField = (props) => {
                 });
               } else {
                 // TODO show error to the user
+                /* eslint-disable no-console */
                 console.log('Error uploading an image to Cloudinary:', error.message );
+                /* eslint-enable no-console */
               }
             }
-          )}
+          );}
         }
       >
         upload media
@@ -267,4 +292,38 @@ const ImageField = (props) => {
   } else {
     return <div><img src={props.element.url} width='200px' height={(props.element.height / props.element.width * 200) + 'px'}/></div>;
   }
-}
+};
+
+ImageField.propTypes = {
+  element: PropTypes.shape({
+    url: PropTypes.string.isRequired,
+    width: PropTypes.number.isRequired,
+    height: PropTypes.number.isRequired
+  }),
+  dispatch: PropTypes.func.isRequired,
+  path: PropTypes.array.isRequired
+};
+
+/**
+ * TODO see if you can make this explicit switch go away nicely.
+ * Simply replacing it with OO method dispatch would force document elements
+ * to care about presentation
+ */
+const Field = (props) => {
+  switch (props.element.type) {
+    case 'SEQUENCE': return Sequence(props);
+    case 'STRING': return StringField(props);
+    case 'MULTILINE_TEXT': return MultilineTextField(props);
+    case 'REPETITION': return Repetition(props);
+    case 'UNKNOWN': return <div>Unknown element</div>;
+    case 'INCOMPLETE_CHOICE': return ChoiceToMake(props);
+    case 'IMAGE': return ImageField(props);
+    default: throw 'element type not understood in renderField()';
+  }
+};
+
+Field.propTypes = {
+  element: PropTypes.shape({
+    type: PropTypes.string.isRequired
+  })
+};

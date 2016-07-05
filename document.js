@@ -2,7 +2,7 @@
 export class Element {
   updatedAt(path, updateFn) {
     if (path.length !== 0) {
-      throw "A basic element does not have sub-elements to update"
+      throw 'A basic element does not have sub-elements to update';
     } else {
       return updateFn(this); // This means that it's the responsibility of the update function to maintain the same element type.
     }
@@ -38,7 +38,7 @@ export class SequenceElement extends CompositeElement {
         ...this.elements,
         [key]: updated
       }
-    )
+    );
   }
 
   objectForJson() {
@@ -65,7 +65,7 @@ export class RepetitionElement extends CompositeElement {
         updated,
         ...this.elements.slice(key + 1)
       ]
-    )
+    );
   }
 
   addNewElement(grammar) {
@@ -85,7 +85,7 @@ export class RepetitionElement extends CompositeElement {
         ...this.elements.slice(0, index),
         ...this.elements.slice(index + 1)
       ]
-    )
+    );
   }
 
   get type() {
@@ -132,7 +132,7 @@ export class MultiLineTextElement extends Element {
     return {
       type: 'MULTILINE_TEXT',
       value: this.value
-    }
+    };
   }
 }
 
@@ -156,28 +156,28 @@ export class IncompleteChoiceElement extends Element {
 }
 
 export const addToRepetition = (grammar, document, path) => {
-  return document.updatedAt(path, (document) => {
-    return document.addNewElement(grammar); // Would it be better for diagnostics to explicitly check the type?
+  return document.updatedAt(path, (doc) => {
+    return doc.addNewElement(grammar); // Would it be better for diagnostics to explicitly check the type?
   });
-}
+};
 
 export const selectExpansion = (grammar, document, path, selected) => {
-  return document.updatedAt(path, (document) => {
-    return document.selectExpansion(grammar, selected);
+  return document.updatedAt(path, (doc) => {
+    return doc.selectExpansion(grammar, selected);
   });
-}
+};
 
 export const updateString = (document, path, updatedValue) => {
-  return document.updatedAt(path, (document) => {
-    return document.updated(updatedValue);
+  return document.updatedAt(path, (doc) => {
+    return doc.updated(updatedValue);
   });
-}
+};
 
 export const removeFromRepetition = (document, path) => {
   if (path.length === 0) {
     throw 'cannot remove the document root';
   }
-  return document.updatedAt(path.slice(0, path.length-1), (document) => {
-    return document.removeElement(path[path.length-1]);
-  })
-}
+  return document.updatedAt(path.slice(0, path.length - 1), (doc) => {
+    return doc.removeElement(path[path.length - 1]);
+  });
+};
