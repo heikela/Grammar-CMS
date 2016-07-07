@@ -163,7 +163,7 @@ const Repetition = (props) => {
           });
         }}
       >
-        Add Item
+        Add {props.element.typeToRepeat}
       </button>
     </div>
   );
