@@ -1,7 +1,7 @@
 module.exports = {
   entry: {
     index: [
-      './DocumentManager.js'
+      './FirebaseCMS.js'
     ],
     tests: [
       './trivialReporter',
