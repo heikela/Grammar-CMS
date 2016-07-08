@@ -17,9 +17,16 @@ import { documentEditor, DocumentEditor } from './DocumentEditor';
 import { install, combineReducers } from 'redux-loop';
 
 const firebaseForCourses = new FirebaseStorageProvider(FIREBASE_REF);
+import { quizzes } from './Quizzes';
 import { login, Login } from './Login';
 
-const cms = combineReducers({login, listing: listing(firebaseForCourses), documentEditor});
+const cms = combineReducers(
+  {
+    login,
+    listing: listing(firebaseForCourses),
+    documentEditor: documentEditor(quizzes)
+  }
+);
 
 const enhancer = compose(
   install(),

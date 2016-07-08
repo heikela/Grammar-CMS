@@ -9,8 +9,6 @@ import {
   removeFromRepetition
 } from './document';
 
-import { quizzes } from './Quizzes';
-
 require('./styles.css');
 
 import {
@@ -30,14 +28,14 @@ const saveDocument = (document) => (
   }
 );
 
-export const documentEditor = (oldState = null, action) => {
+export const documentEditor = (grammar) => (oldState = null, action) => {
   switch (action.type) {
     case 'CREATE_DOCUMENT':
-      return quizzes.initDocument();
+      return grammar.initDocument();
     case 'ADD_TO_SEQUENCE':
-      return addToRepetition(quizzes, oldState, action.path);
+      return addToRepetition(grammar, oldState, action.path);
     case 'SELECT_EXPANSION':
-      return selectExpansion(quizzes, oldState, action.path, action.selected);
+      return selectExpansion(grammar, oldState, action.path, action.selected);
     case 'UPDATED_STRING':
       return updateString(oldState, action.path, action.updatedValue);
     case 'REMOVE_ELEMENT':
