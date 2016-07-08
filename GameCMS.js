@@ -13,8 +13,14 @@ import { documentEditor, DocumentEditor } from './DocumentEditor';
 import { install, combineReducers } from 'redux-loop';
 
 const storage = new LocalStorageStorageProvider('games');
+import { quizzes } from './Quizzes';
 
-const cms = combineReducers({listing: listing(storage), documentEditor});
+const cms = combineReducers(
+  {
+    listing: listing(storage),
+    documentEditor: documentEditor(quizzes)
+  }
+);
 
 const enhancer = compose(
   install(),
