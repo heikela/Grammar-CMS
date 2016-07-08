@@ -65,10 +65,16 @@ export class LocalStorageStorageProvider {
         const id = key.substr(prefixLength + 1);
         this.load(id, (error, document) => {
           if (!error) {
-            listing.push({
-              key: id,
-              title: document.elements.title.value
-            });
+            try {
+              listing.push({
+                key: id,
+                title: document.elements.title.value
+              });
+            } catch (e) {
+              /* eslint-disable no-console */
+              console.log('unable to list document with key: ' + id);
+              /* eslint-disable no-console */
+            }
           }
         });
       }
