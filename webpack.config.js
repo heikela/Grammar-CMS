@@ -3,6 +3,9 @@ module.exports = {
     index: [
       './FirebaseCMS.js'
     ],
+    games: [
+      './GameCMS.js'
+    ],
     local: [
       './LocalStorageCMS.js'
     ],
