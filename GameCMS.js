@@ -15,10 +15,14 @@ import { install, combineReducers } from 'redux-loop';
 const storage = new LocalStorageStorageProvider('games');
 import { gameGrammar } from './GameGrammar';
 
-const cms = combineReducers(
+import { GameLauncher } from './GameLauncher';
+import { game, Game } from './Game';
+
+const editor = combineReducers(
   {
     listing: listing(storage),
-    documentEditor: documentEditor(gameGrammar)
+    documentEditor: documentEditor(gameGrammar),
+    game
   }
 );
 
@@ -27,7 +31,7 @@ const enhancer = compose(
   window.devToolsExtension ? window.devToolsExtension() : f => f
 );
 
-const store = createStore(cms, undefined, enhancer);
+const store = createStore(editor, undefined, enhancer);
 store.dispatch({type: 'LIST_DOCUMENTS'});
 
 const CMS = () => {
@@ -45,7 +49,11 @@ const CMS = () => {
 const render = () => {
   ReactDOM.render(
     <Provider store={store}>
-      <CMS />
+      <div>
+        <CMS />
+        <GameLauncher />
+        <Game />
+      </div>
     </Provider>,
     document.getElementById('app'));
 };
