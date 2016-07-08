@@ -13,12 +13,12 @@ import { documentEditor, DocumentEditor } from './DocumentEditor';
 import { install, combineReducers } from 'redux-loop';
 
 const storage = new LocalStorageStorageProvider('games');
-import { quizzes } from './Quizzes';
+import { gameGrammar } from './GameGrammar';
 
 const cms = combineReducers(
   {
     listing: listing(storage),
-    documentEditor: documentEditor(quizzes)
+    documentEditor: documentEditor(gameGrammar)
   }
 );
 
