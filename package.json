@@ -28,6 +28,7 @@
     "eslint": "^3.0.0",
     "eslint-loader": "^1.4.0",
     "eslint-plugin-react": "^5.2.2",
+    "immutable": "^3.8.1",
     "redux-devtools": "^3.1.1",
     "redux-loop": "^2.1.1",
     "style-loader": "^0.13.1",

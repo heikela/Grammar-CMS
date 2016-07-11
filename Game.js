@@ -1,20 +1,28 @@
 import React, { PropTypes } from 'react';
 import { connect } from 'react-redux';
 
-const initialState = {
-  stage: 'EMPTY',
-  activeGameRules: null
-};
+import { Signup } from './Signup';
+import { textInputInState } from './TextInputInState';
+
+import { Map } from 'immutable';
+
+import { setupPlayers } from './GameUtil';
+
+const initialState = Map({
+    stage: 'EMPTY',
+    activeGameRules: null
+});
 
 export const game = (oldState = initialState, action) => {
+  const intermediate = textInputInState(oldState, action);
   switch (action.type) {
     case 'START_GAME':
-      return {
-        ...oldState,
+      return intermediate.merge({
         stage: 'SIGNUP',
-        activeGameRules: action.rules
-      };
-    default: return oldState;
+        activeGameRules: action.rules,
+        players: setupPlayers(action.rules)
+      });
+    default: return intermediate;
   }
 };
 
@@ -27,7 +35,10 @@ const GamePresentational = (props) => {
       );
     case 'SIGNUP': return (
         <div>
-          Signing up players for a game of {props.rules.title}
+          Signing up players for a game of {props.game.getIn(['activeGameRules', 'title'])}
+          {props.game.get('players').map((player) => {
+            return <Signup key={player.get('id')} playerId={player.get('id')} />;
+          }).toArray()}
         </div>
       );
     default: return <div>Unknown game state</div>;
@@ -35,14 +46,12 @@ const GamePresentational = (props) => {
 };
 GamePresentational.propTypes = {
   stage: PropTypes.string.isRequired,
-  rules: PropTypes.shape({
-    title: PropTypes.string.isRequired
-  })
+  game: PropTypes.object.isRequired
 };
 const mapStateToProps = (state) => (
   {
-    stage: state.game.stage,
-    rules: state.game.activeGameRules
+    stage: state.game.get('stage'),
+    game: state.game
   }
 );
 

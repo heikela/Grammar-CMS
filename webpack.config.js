@@ -11,6 +11,7 @@ module.exports = {
     ],
     tests: [
       './trivialReporter',
+      './GameUtil.test.js',
       './documentTest.js',
       './documentSerialization.test.js'
     ]
