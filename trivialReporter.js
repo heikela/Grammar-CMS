@@ -4,12 +4,13 @@ import { createStore } from 'redux';
 
 import { addListener, STARTING_TEST_RUN, INITIATING_TEST, TEST_PASSED, TEST_FAILED } from './trivialRunner';
 
-const updateTestStatus = (testList, testName, newStatus) => {
+const updateTestStatus = (testList, testName, newStatus, err = '') => {
   return testList.map((test) => {
       if (test.name === testName) {
         return {
           name: test.name,
-          status: newStatus
+          status: newStatus,
+          err: err
         };
       } else {
         return test;
@@ -40,7 +41,7 @@ const reportingStore = (state = {tests: []}, action) => {
     };
     case TEST_FAILED: return {
       startTime: state.startTime,
-      tests: updateTestStatus(state.tests, action.name, 'TEST_FAILED')
+      tests: updateTestStatus(state.tests, action.name, 'TEST_FAILED', action.err.message)
     };
     default: return state;
   }
@@ -72,8 +73,10 @@ export const TestReport = (props) => {
       <h1>Test Results</h1>
       <p>Test run started at: {props.startTime.toString()}</p>
       {props.tests.map((test) => {
+        const failure = test.err ? test.err : '';
         return (
-          <ul key={test.name}>{test.name} - <StatusText status={test.status} /></ul>
+          <ul key={test.name}>{test.name} - <StatusText status={test.status}/> {failure}
+          </ul>
         );
       })}
     </div>
