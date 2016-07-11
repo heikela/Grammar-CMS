@@ -22,6 +22,10 @@ export const game = (oldState = initialState, action) => {
         activeGameRules: action.rules,
         players: setupPlayers(action.rules)
       });
+    case 'FINISH_SIGNUP':
+      return intermediate.merge({
+        stage: 'PLAYING'
+      });
     default: return intermediate;
   }
 };
@@ -39,6 +43,16 @@ const GamePresentational = (props) => {
           {props.game.get('players').map((player) => {
             return <Signup key={player.get('id')} playerId={player.get('id')} />;
           }).toArray()}
+          <button onClick={props.finishSignup}>Start</button>
+        </div>
+      );
+    case 'PLAYING': return (
+        <div>
+          Game of {props.game.getIn(['activeGameRules', 'title'])} ongoing.
+          Players:
+          {props.game.get('players').map((player) => {
+            return <div key={player.get('id')}>{player.get('designation')}: {player.get('name')}</div>;
+          })}
         </div>
       );
     default: return <div>Unknown game state</div>;
@@ -46,7 +60,8 @@ const GamePresentational = (props) => {
 };
 GamePresentational.propTypes = {
   stage: PropTypes.string.isRequired,
-  game: PropTypes.object.isRequired
+  game: PropTypes.object.isRequired,
+  finishSignup: PropTypes.func
 };
 const mapStateToProps = (state) => (
   {
@@ -55,4 +70,10 @@ const mapStateToProps = (state) => (
   }
 );
 
-export const Game = connect(mapStateToProps)(GamePresentational);
+const mapDispatchToProps = (dispatch) => (
+  {
+    finishSignup: () => dispatch({type: 'FINISH_SIGNUP'})
+  }
+);
+
+export const Game = connect(mapStateToProps, mapDispatchToProps)(GamePresentational);
