@@ -5,6 +5,7 @@ import { Signup } from './Signup';
 import { textInputInState } from './TextInputInState';
 
 import { Map } from 'immutable';
+import { reduceReducers } from './redux-util';
 
 import { setupPlayers } from './GameUtil';
 
@@ -13,22 +14,22 @@ const initialState = Map({
     activeGameRules: null
 });
 
-export const game = (oldState = initialState, action) => {
-  const intermediate = textInputInState(oldState, action);
+const gameReducer = (oldState = initialState, action) => {
   switch (action.type) {
     case 'START_GAME':
-      return intermediate.merge({
+      return oldState.merge({
         stage: 'SIGNUP',
         activeGameRules: action.rules,
         players: setupPlayers(action.rules)
       });
     case 'FINISH_SIGNUP':
-      return intermediate.merge({
+      return oldState.merge({
         stage: 'PLAYING'
       });
-    default: return intermediate;
+    default: return oldState;
   }
 };
+export const game = reduceReducers([textInputInState, gameReducer]);
 
 const GamePresentational = (props) => {
   switch (props.stage) {

@@ -13,6 +13,7 @@ module.exports = {
       './trivialReporter',
       './GameUtil.test.js',
       './documentTest.js',
+      './redux-util.test.js',
       './documentSerialization.test.js'
     ]
   },
