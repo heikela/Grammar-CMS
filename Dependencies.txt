@@ -1,0 +1,16 @@
+documentEditor reducer -> document for edit ops impls (genuine dependency)
+documentEditor reducer -> cloudinaryimage for image edit ops (how to make pluggable?)
+DocumentEditor component -> Field component -> OK? - make field types pluggable
+Field "component" -> The relevant components -> Dependency OK but otherwise questionable design?
+
+Sequence component -> Field "component" -> ??
+Repetition component -> Field "component" -> ??
+
+Repetition component -> store for dispatch -> Make into a container component???
+
+StringField component -> Store for dispatch -> make into a container component???
+MultilineTextField component -> Store for dispatch -> make into a container component???
+ChoiceToMake component -> Store for dispatch -> make into a container component???
+
+ImageField component -> cloudinary -> ???
+ImageField component -> store for dispatch -> Make into a container component???
