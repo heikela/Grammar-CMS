@@ -4,12 +4,12 @@ import { Map } from 'immutable';
 
 type ExpansionType = {
   expansionTypeTag: string,
-  initialiser(): *,
+  initialiser(x: any): mixed,
 };
 
-const expansion = (initialiser, expansionTerms) => ({
+const expansion = (initialiser, expansionParams) => ({
   initialiser: initialiser,
-  expansionTerms: expansionTerms,
+  expansionParams: expansionParams,
 });
 
 class Grammar {
@@ -37,11 +37,7 @@ class Grammar {
     this.expansionTypes = this.expansionTypes.set(typeTag, expansionType);
   }
 
-  setExpansion(
-    term: string,
-    expansionTypeTag: string,
-    expansionTerms: Array<string>,
-  ) {
+  setExpansion(term: string, expansionTypeTag: string, expansionParams: *) {
     const expansionType = this.expansionTypes.get(expansionTypeTag);
     if (!expansionType) {
       throw 'cannot add an expansion using the unknown expansion type: ' +
@@ -52,13 +48,13 @@ class Grammar {
     }
     this.expansions = this.expansions.set(
       term,
-      expansion(expansionType.initialiser, expansionTerms),
+      expansion(expansionType.initialiser, expansionParams),
     );
   }
 
   createDocument(root: string) {
-    const expansionType = this.expansions.get(root);
-    return expansionType.initialiser();
+    const expansion = this.expansions.get(root);
+    return expansion.initialiser(expansion.expansionParams);
   }
 }
 
