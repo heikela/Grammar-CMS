@@ -5,7 +5,7 @@ const alternativesTypeTag = 'ALTERNATIVES';
 
 const Alternatives = {
   expansionType: {
-    expansionTypeTag: alternativesTypeTag,
+    typeTag: alternativesTypeTag,
     initialiser: (alternatives: Array<string>) =>
       new MultipleChoice(alternatives),
   },

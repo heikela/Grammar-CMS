@@ -3,7 +3,7 @@ const constantTypeTag = 'CONSTANT';
 
 const Constant = {
   expansionType: {
-    expansionTypeTag: constantTypeTag,
+    typeTag: constantTypeTag,
     initialiser: (x: *) => x,
   },
   typeTag: constantTypeTag,

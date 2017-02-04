@@ -3,6 +3,15 @@
 import React, { Component } from 'react';
 import logo from './logo.svg';
 import './App.css';
+import DocumentEditor from './DocumentEditor/DocumentEditor';
+import Grammar from './grammar/Grammar';
+import Alternatives from './grammar/alternatives/Alternatives';
+import Constant from './grammar/constant/Constant';
+
+const grammar = new Grammar();
+grammar.registerExpansionType(Alternatives.expansionType);
+grammar.registerExpansionType(Constant.expansionType);
+grammar.setExpansion('root', Alternatives.typeTag, ['email', 'phone']);
 
 class App extends Component {
   render() {
@@ -12,9 +21,7 @@ class App extends Component {
           <img src={logo} className="App-logo" alt="logo" />
           <h2>Welcome to React</h2>
         </div>
-        <p className="App-intro">
-          To get started, edit <code>src/App.js</code> and save to reload.
-        </p>
+        <DocumentEditor grammar={grammar} root="root" />
       </div>
     );
   }

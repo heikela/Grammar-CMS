@@ -1,11 +1,12 @@
 // @flow
 
 import { Map } from 'immutable';
+import Repository from '../repository/Repository';
 
-type ExpansionType = {
-  expansionTypeTag: string,
+interface ExpansionType {
+  typeTag: string,
   initialiser(x: any): mixed,
-};
+}
 
 const expansion = (initialiser, expansionParams) => ({
   initialiser: initialiser,
@@ -13,38 +14,33 @@ const expansion = (initialiser, expansionParams) => ({
 });
 
 class Grammar {
-  expansionTypes: Map<string, *>;
+  expansionTypes: Repository<ExpansionType>;
   expansions: Map<string, *>;
 
   constructor() {
-    this.expansionTypes = Map();
+    this.expansionTypes = new Repository();
     this.expansions = Map();
   }
 
   registerExpansionType(expansionType: ExpansionType) {
-    const typeTag = expansionType.expansionTypeTag;
-    if (typeof typeTag !== 'string') {
-      throw 'expansionType must have an expansionTypeTag of type string';
-    }
-    if (this.expansionTypes.has(typeTag)) {
-      throw 'expansionType must have an unique expansionTypeTag. ' +
-        typeTag +
-        ' is taken.';
-    }
     if (typeof expansionType.initialiser !== 'function') {
-      throw 'expansionType must have an initialiser function';
+      throw new Error('expansionType must have an initialiser function');
     }
-    this.expansionTypes = this.expansionTypes.set(typeTag, expansionType);
+    this.expansionTypes.registerType(expansionType);
   }
 
   setExpansion(term: string, expansionTypeTag: string, expansionParams: *) {
     const expansionType = this.expansionTypes.get(expansionTypeTag);
     if (!expansionType) {
-      throw 'cannot add an expansion using the unknown expansion type: ' +
-        expansionTypeTag;
+      throw new Error(
+        'cannot add an expansion using the unknown expansion type: ',
+        +expansionTypeTag,
+      );
     }
     if (this.expansions.has(term)) {
-      throw 'cannot add multiple expansions for the same term: ' + term;
+      throw new Error(
+        'cannot add multiple expansions for the same term: ' + term,
+      );
     }
     this.expansions = this.expansions.set(
       term,
