@@ -1,9 +1,11 @@
 // @flow
 import React, { Component } from 'react';
 import Grammar from '../grammar/Grammar';
+import Repository from '../repository/Repository';
 
 type Props = {
   grammar: Grammar,
+  componentRepository: Repository<Component<*, *, *>>,
   root: string,
 };
 class DocumentEditor extends Component {
@@ -19,7 +21,10 @@ class DocumentEditor extends Component {
   }
 
   render() {
-    return <div>{JSON.stringify(this.state.document)}</div>;
+    const element = this.state.document;
+    const componentRepository = this.props.componentRepository;
+    const Renderer = componentRepository.get(element.typeTag).component;
+    return <Renderer data={element} />;
   }
 }
 

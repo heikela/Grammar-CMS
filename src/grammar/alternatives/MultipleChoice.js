@@ -1,13 +1,13 @@
 // @flow
 
-const multipleChoiceTermType = 'MULTIPLE_CHOICE';
+export const multipleChoiceTermType = 'MULTIPLE_CHOICE';
 
 class MultipleChoice {
-  termType: string;
+  typeTag: string;
   alternatives: Array<string>;
 
   constructor(alternatives: Array<string>) {
-    this.termType = multipleChoiceTermType;
+    this.typeTag = multipleChoiceTermType;
     this.alternatives = alternatives;
   }
 }
