@@ -66,6 +66,9 @@ describe('grammar', () => {
     grammar.registerExpansionType(booleanField);
     grammar.setExpansion('root', 'booleanField', []);
     const document = grammar.createDocument('root');
-    expect(document).toBe(true);
+    expect(document).toEqual({
+      typeTag: 'booleanField',
+      data: true,
+    });
   });
 });

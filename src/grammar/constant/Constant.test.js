@@ -7,6 +7,9 @@ describe('Constant expansion type', () => {
     let grammar = new Grammar();
     grammar.registerExpansionType(Constant.expansionType);
     grammar.setExpansion('root', Constant.typeTag, { field: 'value' });
-    expect(grammar.createDocument('root')).toEqual({ field: 'value' });
+    expect(grammar.createDocument('root')).toEqual({
+      typeTag: 'CONSTANT',
+      data: { field: 'value' },
+    });
   });
 });

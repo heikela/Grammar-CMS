@@ -1,6 +1,6 @@
 // @flow
 import React, { Component } from 'react';
-import { multipleChoiceTermType } from './MultipleChoice';
+import { alternativesTypeTag } from './Alternatives';
 
 export class MultipleChoiceComponent extends Component {
   render() {
@@ -17,7 +17,7 @@ export class MultipleChoiceComponent extends Component {
 }
 
 export const MultipleChoiceComponentType = {
-  typeTag: multipleChoiceTermType,
+  typeTag: alternativesTypeTag,
   component: MultipleChoiceComponent,
 };
 

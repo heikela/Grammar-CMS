@@ -1,7 +1,7 @@
 // @flow
 import MultipleChoice from './MultipleChoice';
 
-const alternativesTypeTag = 'ALTERNATIVES';
+export const alternativesTypeTag = 'ALTERNATIVES';
 
 const Alternatives = {
   expansionType: {

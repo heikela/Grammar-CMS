@@ -3,13 +3,25 @@
 import { Map } from 'immutable';
 import Repository from '../repository/Repository';
 
-interface ExpansionType {
+export interface documentElement {
+  typeTag: string,
+  data: mixed,
+}
+
+export interface ExpansionType {
   typeTag: string,
   initialiser(x: any): mixed,
 }
 
-const expansion = (initialiser, expansionParams) => ({
-  initialiser: initialiser,
+export interface Expansion {
+  typeTag: string,
+  initialiser(x: any): mixed,
+  expansionParams: mixed,
+}
+
+const expansion = (expansionType, expansionParams): Expansion => ({
+  typeTag: expansionType.typeTag,
+  initialiser: expansionType.initialiser,
   expansionParams: expansionParams,
 });
 
@@ -44,13 +56,16 @@ class Grammar {
     }
     this.expansions = this.expansions.set(
       term,
-      expansion(expansionType.initialiser, expansionParams),
+      expansion(expansionType, expansionParams),
     );
   }
 
-  createDocument(root: string) {
+  createDocument(root: string): documentElement {
     const expansion = this.expansions.get(root);
-    return expansion.initialiser(expansion.expansionParams);
+    return {
+      typeTag: expansion.typeTag,
+      data: expansion.initialiser(expansion.expansionParams),
+    };
   }
 }
 
