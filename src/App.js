@@ -24,7 +24,10 @@ knownDocumentComponents.registerType(MultipleChoiceComponentType);
 
 const docName = '1stDoc';
 
-const store = createStore(reducer);
+const store = createStore(
+  reducer,
+  window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__(),
+);
 store.dispatch(createDocument(docName, grammar.createDocument('root')));
 
 class App extends Component {
