@@ -9,6 +9,7 @@ import Repository from './repository/Repository';
 import {
   MultipleChoiceComponentType,
 } from './grammar/alternatives/MultipleChoiceComponent';
+import { ConstantComponentType } from './grammar/constant/ConstantComponent';
 
 import reducer, { createDocument } from './DocumentEditor/DocumentEditorState';
 import { createStore } from 'redux';
@@ -18,9 +19,12 @@ const grammar = new Grammar();
 grammar.registerExpansionType(Alternatives.expansionType);
 grammar.registerExpansionType(Constant.expansionType);
 grammar.setExpansion('root', Alternatives.typeTag, ['email', 'phone']);
+grammar.setExpansion('email', Constant.typeTag, 'some.email@example.com');
+grammar.setExpansion('phone', Constant.typeTag, '+44123456789');
 
 const knownDocumentComponents = new Repository();
 knownDocumentComponents.registerType(MultipleChoiceComponentType);
+knownDocumentComponents.registerType(ConstantComponentType);
 
 const docName = '1stDoc';
 

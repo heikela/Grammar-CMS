@@ -1,5 +1,5 @@
 // @flow
-const constantTypeTag = 'CONSTANT';
+export const constantTypeTag = 'CONSTANT';
 
 const Constant = {
   expansionType: {
