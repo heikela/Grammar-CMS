@@ -53,10 +53,10 @@ export class MultipleChoiceComponent extends Component {
 }
 
 const mapStateToProps = null;
-const mapDispatchToProps = (dispatch: Dispatch<*>, ownProps) => {
-  const result = {
-    handleChange: e => {
-      const chosenAlternative = e.target.value;
+const mapDispatchToProps = (dispatch: Dispatch<*>, ownProps) => ({
+  handleChange: e => {
+    const chosenAlternative = e.target.value;
+    if (chosenAlternative !== NO_SELECTION) {
       const newElement = ownProps.grammar.createDocument(chosenAlternative);
       const newElementId = genId('elem');
       dispatch(createElement(ownProps.documentId, newElementId, newElement));
@@ -67,11 +67,17 @@ const mapDispatchToProps = (dispatch: Dispatch<*>, ownProps) => {
           ownProps.element.data.select(chosenAlternative, newElementId),
         ),
       );
-    },
-  };
-  console.log(result);
-  return result;
-};
+    } else {
+      dispatch(
+        updateElement(
+          ownProps.documentId,
+          ownProps.elementId,
+          ownProps.element.data.deselect(),
+        ),
+      );
+    }
+  },
+});
 
 const MultipleChoiceContainer = connect(mapStateToProps, mapDispatchToProps)(
   MultipleChoiceComponent,
