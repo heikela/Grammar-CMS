@@ -19,17 +19,19 @@ type Props =
   }
   & ElementComponentProps;
 
+const NO_SELECTION = '_not_chosen';
+
 export class MultipleChoiceComponent extends Component {
   props: Props;
 
   render() {
     const data: MultipleChoice = this.props.element.data;
     const options = data.alternatives.map(alternative => (
-      <option key={alternative} id={alternative}>{alternative}</option>
+      <option key={alternative} value={alternative}>{alternative}</option>
     ));
     const select = (
       <select onChange={this.props.handleChange}>
-        <option id="_not_chosen">Choose Type</option>
+        <option value={NO_SELECTION}>Choose Type</option>
         {options}
       </select>
     );

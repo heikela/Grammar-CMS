@@ -23,6 +23,10 @@ class MultipleChoice {
       childElementId: newElementId,
     });
   }
+
+  deselect() {
+    return new MultipleChoice(this.alternatives);
+  }
 }
 
 export default MultipleChoice;
