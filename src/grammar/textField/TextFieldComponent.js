@@ -16,6 +16,7 @@ export class TextFieldComponent extends Component {
   props: Props;
 
   render() {
+    // TODO how can I autofocus this on mount
     return (
       <input
         value={this.props.element.data.value}
@@ -29,14 +30,19 @@ const mapDispatchToProps = (
   dispatch: Dispatch<*>,
   ownProps: ElementComponentProps,
 ): DispatchProps => ({
-  handleChange: (e: Event) => {
-    dispatch(
-      updateElement(
-        ownProps.documentId,
-        ownProps.elementId,
-        new TextFieldData(e.target.value),
-      ),
-    );
+  handleChange: event => {
+    const { target } = event;
+    if (!(target instanceof window.HTMLInputElement)) {
+      return;
+    } else {
+      dispatch(
+        updateElement(
+          ownProps.documentId,
+          ownProps.elementId,
+          new TextFieldData(target.value),
+        ),
+      );
+    }
   },
 });
 
