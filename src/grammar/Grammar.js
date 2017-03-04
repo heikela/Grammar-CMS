@@ -5,17 +5,30 @@ import Repository from '../repository/Repository';
 
 export interface documentElement {
   typeTag: string,
-  data: mixed,
+  data: any,
 }
+
+export interface elementAndId {
+  elementId: string,
+  element: documentElement,
+}
+
+type initialiserFunction<D> = (
+  rootElementId: string,
+  data: D,
+  grammar: ?Grammar,
+) => createElementsResult;
+
+export type createElementsResult = Array<elementAndId>;
 
 export interface ExpansionType {
   typeTag: string,
-  initialiser(x: any): mixed,
+  initialiser: initialiserFunction<any>,
 }
 
 export interface Expansion {
   typeTag: string,
-  initialiser(x: any): mixed,
+  initialiser: initialiserFunction<any>,
   expansionParams: mixed,
 }
 
@@ -23,6 +36,19 @@ const expansion = (expansionType, expansionParams): Expansion => ({
   typeTag: expansionType.typeTag,
   initialiser: expansionType.initialiser,
   expansionParams: expansionParams,
+});
+
+export const makeElement = (typeTag: string, data: mixed): documentElement => ({
+  typeTag,
+  data,
+});
+
+export const idForElement = (
+  elementId: string,
+  element: documentElement,
+): elementAndId => ({
+  elementId,
+  element,
 });
 
 class Grammar {
@@ -60,12 +86,13 @@ class Grammar {
     );
   }
 
-  createDocument(root: string): documentElement {
+  createElements(root: string, rootElementId: string): createElementsResult {
     const expansion = this.expansions.get(root);
-    return {
-      typeTag: expansion.typeTag,
-      data: expansion.initialiser(expansion.expansionParams),
-    };
+    return expansion.initialiser(
+      rootElementId,
+      expansion.expansionParams,
+      this,
+    );
   }
 }
 

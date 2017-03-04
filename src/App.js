@@ -13,7 +13,10 @@ import {
 import { ConstantComponentType } from './grammar/constant/ConstantComponent';
 import { TextFieldComponentType } from './grammar/textField/TextFieldComponent';
 
-import reducer, { createDocument } from './DocumentEditor/DocumentEditorState';
+import reducer, {
+  createDocument,
+  ROOT_ELEMENT_ID,
+} from './DocumentEditor/DocumentEditorState';
 import { createStore } from 'redux';
 import { Provider } from 'react-redux';
 
@@ -37,7 +40,9 @@ const store = createStore(
   reducer,
   window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__(),
 );
-store.dispatch(createDocument(docName, grammar.createDocument('root')));
+store.dispatch(
+  createDocument(docName, grammar.createElements(ROOT_ELEMENT_ID, 'root')),
+);
 
 class App extends Component {
   render() {

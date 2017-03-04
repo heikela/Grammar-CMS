@@ -4,7 +4,7 @@ import { connect } from 'react-redux';
 import { alternativesTypeTag } from './Alternatives';
 import MultipleChoice from './MultipleChoice';
 import {
-  createElement,
+  addElements,
   updateElement,
 } from '../../DocumentEditor/DocumentEditorState';
 import { genId } from '../../util';
@@ -57,9 +57,12 @@ const mapDispatchToProps = (dispatch: Dispatch<*>, ownProps) => ({
   handleChange: e => {
     const chosenAlternative = e.target.value;
     if (chosenAlternative !== NO_SELECTION) {
-      const newElement = ownProps.grammar.createDocument(chosenAlternative);
       const newElementId = genId('elem');
-      dispatch(createElement(ownProps.documentId, newElementId, newElement));
+      const newElements = ownProps.grammar.createElements(
+        chosenAlternative,
+        newElementId,
+      );
+      dispatch(addElements(ownProps.documentId, newElements));
       dispatch(
         updateElement(
           ownProps.documentId,

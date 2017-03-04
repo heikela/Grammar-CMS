@@ -6,8 +6,15 @@ export const alternativesTypeTag = 'ALTERNATIVES';
 const Alternatives = {
   expansionType: {
     typeTag: alternativesTypeTag,
-    initialiser: (alternatives: Array<string>) =>
-      new MultipleChoice(alternatives),
+    initialiser: (rootElementId: string, alternatives: Array<string>) => [
+      {
+        elementId: rootElementId,
+        element: {
+          typeTag: alternativesTypeTag,
+          data: new MultipleChoice(alternatives),
+        },
+      },
+    ],
   },
   typeTag: alternativesTypeTag,
 };

@@ -7,11 +7,16 @@ describe('TextField expansion type', () => {
     let grammar = new Grammar();
     grammar.registerExpansionType(TextField.expansionType);
     grammar.setExpansion('root', TextField.typeTag);
-    expect(grammar.createDocument('root')).toEqual({
-      typeTag: 'TEXT_FIELD',
-      data: {
-        value: '',
+    expect(grammar.createElements('root', 'someId')).toEqual([
+      {
+        elementId: 'someId',
+        element: {
+          typeTag: 'TEXT_FIELD',
+          data: {
+            value: '',
+          },
+        },
       },
-    });
+    ]);
   });
 });

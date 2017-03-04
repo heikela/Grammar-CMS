@@ -1,13 +1,17 @@
 // @flow
 
-import Grammar from './Grammar';
+import Grammar, { idForElement, makeElement } from './Grammar';
+
+const dummyInitialiser = (id: string) => [
+  idForElement(id, makeElement('SOME_TYPE', {})),
+];
 
 describe('grammar', () => {
   it('does not accept an expansion type without an expansion type tag', () => {
     const grammar = new Grammar();
     // $FlowFixMe
     expect(() => grammar.registerExpansionType({
-      initialiser: () => true,
+      initialiser: dummyInitialiser,
     })).toThrowError(/typeTag/);
   });
 
@@ -17,7 +21,7 @@ describe('grammar', () => {
       const grammar = new Grammar();
       const expansionType = {
         typeTag: 'booleanField',
-        initialiser: () => false,
+        initialiser: dummyInitialiser,
       };
       grammar.registerExpansionType(expansionType);
       expect(() => grammar.registerExpansionType(expansionType)).toThrowError(
@@ -39,16 +43,17 @@ describe('grammar', () => {
 
   it('does not allow adding expansions with unknown expansion types', () => {
     const grammar = new Grammar();
-    expect(
-      () => grammar.setExpansion('root', 'unknownExpansionType', []),
-    ).toThrowError(/not found.*ype/);
+    expect(() =>
+      grammar.setExpansion('root', 'unknownExpansionType', [])).toThrowError(
+      /not found.*ype/,
+    );
   });
 
   it('does not allow adding two expansions for the same term', () => {
     const grammar = new Grammar();
     const booleanField = {
       typeTag: 'booleanField',
-      initialiser: () => false,
+      initialiser: dummyInitialiser,
     };
     grammar.registerExpansionType(booleanField);
     grammar.setExpansion('root', 'booleanField', []);
@@ -61,14 +66,19 @@ describe('grammar', () => {
     const grammar = new Grammar();
     const booleanField = {
       typeTag: 'booleanField',
-      initialiser: () => true,
+      initialiser: id => [idForElement(id, makeElement('booleanField', false))],
     };
     grammar.registerExpansionType(booleanField);
     grammar.setExpansion('root', 'booleanField', []);
-    const document = grammar.createDocument('root');
-    expect(document).toEqual({
-      typeTag: 'booleanField',
-      data: true,
-    });
+    const elements = grammar.createElements('root', 'someId');
+    expect(elements).toEqual([
+      {
+        element: {
+          typeTag: 'booleanField',
+          data: false,
+        },
+        elementId: 'someId',
+      },
+    ]);
   });
 });

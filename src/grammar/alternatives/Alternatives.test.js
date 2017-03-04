@@ -11,9 +11,14 @@ describe('Alternatives expansion type', () => {
       'boolTerm',
       'stringTerm',
     ]);
-    expect(grammar.createDocument('root')).toEqual({
-      typeTag: 'ALTERNATIVES',
-      data: new MultipleChoice(['boolTerm', 'stringTerm']),
-    });
+    expect(grammar.createElements('root', 'someId')).toEqual([
+      {
+        elementId: 'someId',
+        element: {
+          typeTag: 'ALTERNATIVES',
+          data: new MultipleChoice(['boolTerm', 'stringTerm']),
+        },
+      },
+    ]);
   });
 });

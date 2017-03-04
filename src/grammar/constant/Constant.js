@@ -1,10 +1,14 @@
 // @flow
+import { idForElement, makeElement } from '../Grammar';
+
 export const constantTypeTag = 'CONSTANT';
 
 const Constant = {
   expansionType: {
     typeTag: constantTypeTag,
-    initialiser: (x: *) => x,
+    initialiser: (rootElementId: string, x: *) => [
+      idForElement(rootElementId, makeElement(constantTypeTag, x)),
+    ],
   },
   typeTag: constantTypeTag,
 };

@@ -1,12 +1,14 @@
 // @flow
 import { Map } from 'immutable';
 
-import type { documentElement } from '../grammar/Grammar';
+import type { documentElement, createElementsResult } from '../grammar/Grammar';
 
 export const ROOT_ELEMENT_ID = 'root';
 
+type document = Map<string, documentElement>;
+
 export type documentEditorState = {
-  elements: Map<string, Map<string, documentElement>>,
+  elements: Map<string, document>,
 };
 
 export const getElement = (
@@ -40,26 +42,23 @@ export const updateElement = (
   };
 };
 
-export type createElementAction = {
-  type: 'CREATE_ELEMENT',
+export type addElementsAction = {
+  type: 'ADD_ELEMENTS',
   payload: {
     documentId: string,
-    elementId: string,
-    element: documentElement,
+    elements: createElementsResult,
   },
 };
 
-export const createElement = (
+export const addElements = (
   documentId: string,
-  elementId: string,
-  element: documentElement,
-): createElementAction => {
+  elements: createElementsResult,
+): addElementsAction => {
   return {
-    type: 'CREATE_ELEMENT',
+    type: 'ADD_ELEMENTS',
     payload: {
       documentId,
-      elementId,
-      element,
+      elements,
     },
   };
 };
@@ -68,22 +67,22 @@ export type createDocumentAction = {
   type: 'CREATE_DOCUMENT',
   payload: {
     documentId: string,
-    rootElement: documentElement,
+    elements: createElementsResult,
   },
 };
 
 export const createDocument = (
   documentId: string,
-  root: documentElement,
+  elements: createElementsResult,
 ): createDocumentAction => ({
   type: 'CREATE_DOCUMENT',
   payload: {
     documentId: documentId,
-    rootElement: root,
+    elements: elements,
   },
 });
 
-type action = updateAction | createElementAction | createDocumentAction;
+type action = updateAction | addElementsAction | createDocumentAction;
 
 const reducer = (
   oldState: documentEditorState = { elements: new Map() },
@@ -99,12 +98,16 @@ const reducer = (
         ),
       };
 
-    case 'CREATE_ELEMENT':
-      const createElement: createElementAction = action;
+    case 'ADD_ELEMENTS':
       return {
-        elements: oldState.elements.setIn(
-          [action.payload.documentId, action.payload.elementId],
-          createElement.payload.element,
+        elements: oldState.elements.mergeIn(
+          [action.payload.documentId],
+          new Map(
+            action.payload.elements.map(({ elementId, element }) => [
+              elementId,
+              element,
+            ]),
+          ),
         ),
       };
 
@@ -112,7 +115,12 @@ const reducer = (
       const state = {
         elements: oldState.elements.set(
           action.payload.documentId,
-          new Map().set(ROOT_ELEMENT_ID, action.payload.rootElement),
+          new Map(
+            action.payload.elements.map(({ elementId, element }) => [
+              elementId,
+              element,
+            ]),
+          ),
         ),
       };
       return state;
