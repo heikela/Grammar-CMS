@@ -6,6 +6,11 @@ import type { createElementsResult } from '../Grammar';
 
 export const sequenceTypeTag = 'SEQUENCE';
 
+export type SequenceElementData = {
+  fields: Array<string>,
+  childElementIds: Map<string, string>,
+};
+
 const SequenceType = {
   typeTag: sequenceTypeTag,
   expansionType: {
@@ -30,7 +35,7 @@ const SequenceType = {
             rootElementId,
             makeElement(sequenceTypeTag, {
               fields: fieldList,
-              childIds: childElementIds,
+              childElementIds: childElementIds,
             }),
           ),
         ]);

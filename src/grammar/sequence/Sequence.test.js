@@ -14,9 +14,6 @@ describe('Sequence expansion type', () => {
     grammar.setExpansion('root', Sequence.typeTag, ['name', 'email']);
     grammar.setExpansion('name', Constant.typeTag, 'Jane Doe');
     grammar.setExpansion('email', Constant.typeTag, 'someone@example.com');
-    // TODO seems like grammar.createDocument needs to start returning the created
-    // element plus an array of child elements that should be added to the state
-    // together with it
 
     const elements = grammar.createElements('root', 'someId');
     const rootElement = elements.find(
