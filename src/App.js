@@ -12,6 +12,7 @@ import {
 } from './grammar/alternatives/MultipleChoiceComponent';
 import { TextFieldComponentType } from './grammar/textField/TextFieldComponent';
 import { SequenceComponentType } from './grammar/sequence/SequenceComponent';
+import Serialized from './serialize/SerializedViewer';
 
 import reducer, {
   createDocument,
@@ -50,12 +51,16 @@ class App extends Component {
     return (
       <div className="App">
         <Provider store={store}>
-          <DocumentEditor
-            documentId={docName}
-            grammar={grammar}
-            elementId="root"
-            componentRepository={knownDocumentComponents}
-          />
+          <div>
+            <DocumentEditor
+              documentId={docName}
+              grammar={grammar}
+              elementId="root"
+              componentRepository={knownDocumentComponents}
+            />
+            <hr />
+            <Serialized documentId={docName} />
+          </div>
         </Provider>
       </div>
     );
