@@ -21,15 +21,19 @@ describe('Sequence expansion type', () => {
     );
     expect(rootElement).toBeTruthy();
     if (rootElement) {
-      const nameElementId = rootElement.element.data.childIds.get('name');
-      const emailElementId = rootElement.element.data.childIds.get('email');
+      const nameElementId = rootElement.element.data.childElementIds.get(
+        'name',
+      );
+      const emailElementId = rootElement.element.data.childElementIds.get(
+        'email',
+      );
       expect(rootElement).toEqual({
         elementId: 'someId',
         element: {
           typeTag: 'SEQUENCE',
           data: {
             fields: ['name', 'email'],
-            childIds: Map({
+            childElementIds: Map({
               name: nameElementId,
               email: emailElementId,
             }),

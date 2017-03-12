@@ -8,7 +8,9 @@ import { alternativesTypeTag } from '../grammar/alternatives/Alternatives';
 import MultipleChoice from '../grammar/alternatives/MultipleChoice';
 import { constantTypeTag } from '../grammar/constant/Constant';
 import { sequenceTypeTag } from '../grammar/sequence/Sequence';
+import { repetitionTypeTag } from '../grammar/repetition/Repetition';
 import type { SequenceElementData } from '../grammar/sequence/Sequence';
+import type { RepetitionElementData } from '../grammar/repetition/Repetition';
 import { textFieldTypeTag } from '../grammar/textField/TextField';
 
 export const serialize = (
@@ -16,7 +18,6 @@ export const serialize = (
   documentId: string,
   elementId: string,
 ) => {
-  console.log('foobar', state, documentId, elementId);
   const element = getElement(state, documentId, elementId);
   if (!element) return null;
   switch (element.typeTag) {
@@ -44,6 +45,10 @@ export const serialize = (
         );
       });
       return result;
+    case repetitionTypeTag:
+      const repetitionData: RepetitionElementData = element.data;
+      return repetitionData.childElementIds.map(id =>
+        serialize(state, documentId, id));
     case textFieldTypeTag:
       return element.data.value;
   }

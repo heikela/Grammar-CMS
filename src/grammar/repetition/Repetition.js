@@ -11,6 +11,14 @@ export type RepetitionElementData = {
   childElementIds: List<string>,
 };
 
+export const appendChild = (
+  data: RepetitionElementData,
+  newElementId: string,
+): RepetitionElementData => ({
+  termToRepeat: data.termToRepeat,
+  childElementIds: data.childElementIds.push(newElementId),
+});
+
 const RepetitionType = {
   typeTag: repetitionTypeTag,
   expansionType: {

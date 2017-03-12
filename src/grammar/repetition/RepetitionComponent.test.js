@@ -11,6 +11,7 @@ import DocumentEditor from '../../DocumentEditor/DocumentEditor';
 
 import reducer, {
   createDocument,
+  getElement,
   ROOT_ELEMENT_ID,
 } from '../../DocumentEditor/DocumentEditorState';
 
@@ -25,14 +26,14 @@ describe('Repetition component', () => {
   let store;
   let subject;
 
+  const docName = 'testDocument';
+
   beforeEach(() => {
     store = createStore(reducer);
 
     const knownDocumentComponents = new Repository();
     knownDocumentComponents.registerType(RepetitionComponentType);
     knownDocumentComponents.registerType(ConstantComponentType);
-
-    const docName = 'testDocument';
 
     let grammar = new Grammar();
     grammar.registerExpansionType(Repetition.expansionType);
@@ -57,4 +58,27 @@ describe('Repetition component', () => {
   });
 
   it('renders without crashing', () => {});
+
+  it('allows adding new elements to the repetition', () => {
+    const repetitionComponent = subject.find(RepetitionComponentType.component);
+    expect(repetitionComponent.exists()).toBeTruthy();
+    const addNewElementButton = subject.find('AddNewElementButton');
+    expect(addNewElementButton.exists()).toBeTruthy();
+    addNewElementButton.simulate('click');
+    const state = store.getState();
+    const repetitionElement = getElement(state, docName, 'root');
+    expect(repetitionElement).toBeTruthy();
+    if (repetitionElement) {
+      const childElementIds = repetitionElement.data.childElementIds;
+      expect(childElementIds.size).toEqual(1);
+      const addedChildElement = childElementIds.get(0);
+      expect(getElement(state, docName, addedChildElement)).toEqual({
+        typeTag: 'CONSTANT',
+        data: 'someone@example.com',
+      });
+      const firstChildComponent = repetitionComponent.find('ElementComponent');
+      expect(firstChildComponent.exists()).toBeTruthy();
+      expect(firstChildComponent.props().elementId).toEqual(addedChildElement);
+    }
+  });
 });
