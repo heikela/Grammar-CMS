@@ -12,10 +12,6 @@ type ComponentProps = {
   documentId: string,
 };
 
-type ContainerProps = {
-  documentId: string,
-};
-
 const SerializedViewer = (props: ComponentProps) => {
   return (
     <div>
@@ -33,5 +29,8 @@ const SerializedViewer = (props: ComponentProps) => {
 const SerializedViewerContainer = connect((state: documentEditorState) => ({
   state: state,
 }))(SerializedViewer);
+SerializedViewerContainer.propTypes = {
+  documentId: React.PropTypes.string.isRequired,
+};
 
 export default SerializedViewerContainer;

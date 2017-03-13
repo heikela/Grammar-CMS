@@ -23,7 +23,9 @@ type DispatchProps = {
 type Props = ElementComponentProps & DispatchProps;
 
 export class RepetitionComponent extends Component {
-  props: ElementComponentProps;
+  // TODO find out what would need to be done for this to be actually checked.
+  // E.g. to remove the $SubType<...> from ElementComponentProps
+  props: Props;
 
   render() {
     return (

@@ -51,5 +51,11 @@ export const serialize = (
         serialize(state, documentId, id));
     case textFieldTypeTag:
       return element.data.value;
+    default:
+      throw new Error(
+        'Cannot serialize unknown element type with typeTag=' +
+          element.typeTag +
+          "'",
+      );
   }
 };

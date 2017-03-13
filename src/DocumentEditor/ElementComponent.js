@@ -18,6 +18,7 @@ export type ElementContainerProps = {
   componentRepository: Repository<componentByTag>,
 };
 
+// TODO too flexible?
 export type ElementComponentProps = $Subtype<
   & {
     element: documentElement,

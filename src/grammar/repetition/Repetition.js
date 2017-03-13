@@ -1,7 +1,6 @@
 // @flow
 import { List } from 'immutable';
 import Grammar, { idForElement, makeElement } from '../Grammar';
-import { genId } from '../../util';
 import type { createElementsResult } from '../Grammar';
 
 export const repetitionTypeTag = 'REPETITION';
