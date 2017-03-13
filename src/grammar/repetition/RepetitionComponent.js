@@ -1,7 +1,7 @@
 // @flow
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
-import { appendChild, repetitionTypeTag } from './Repetition';
+import { repetitionTypeTag, appendChild, removeChild } from './Repetition';
 import ElementContainer from '../../DocumentEditor/ElementComponent';
 import type {
   ElementComponentProps,
@@ -16,8 +16,20 @@ const AddNewElementButton = ({ addElement }) => (
   <span onClick={addElement}>Add Element</span>
 );
 
+const RemoveButton = ({ removeElement }) => (
+  <span onClick={removeElement}>Remove</span>
+);
+
+const RepetitionWrapper = ({ removeElement, elementId, children }) => (
+  <div>
+    {children}
+    <RemoveButton removeElement={removeElement} />
+  </div>
+);
+
 type DispatchProps = {
   addElement(e: Event): void,
+  removeElement(childElementId: string): void,
 };
 
 type Props = ElementComponentProps & DispatchProps;
@@ -30,17 +42,20 @@ export class RepetitionComponent extends Component {
   render() {
     return (
       <div>
-        {this.props.element.data.childElementIds
-          .toArray()
-          .map(id => (
+        {this.props.element.data.childElementIds.toArray().map(id => (
+          <RepetitionWrapper
+            removeElement={e => this.props.removeElement(id)}
+            elementId={id}
+            key={id}
+          >
             <ElementContainer
               componentRepository={this.props.componentRepository}
               grammar={this.props.grammar}
               documentId={this.props.documentId}
-              key={id}
               elementId={id}
             />
-          ))}
+          </RepetitionWrapper>
+        ))}
         <AddNewElementButton addElement={this.props.addElement} />
       </div>
     );
@@ -62,6 +77,15 @@ const mapDispatchToProps = (
         ownProps.documentId,
         ownProps.elementId,
         appendChild(ownProps.element.data, newId),
+      ),
+    );
+  },
+  removeElement: childElementId => {
+    dispatch(
+      updateElement(
+        ownProps.documentId,
+        ownProps.elementId,
+        removeChild(ownProps.element.data, childElementId),
       ),
     );
   },

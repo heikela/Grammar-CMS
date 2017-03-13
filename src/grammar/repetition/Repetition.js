@@ -18,6 +18,16 @@ export const appendChild = (
   childElementIds: data.childElementIds.push(newElementId),
 });
 
+export const removeChild = (
+  data: RepetitionElementData,
+  idForElementToRemove: string,
+): RepetitionElementData => ({
+  termToRepeat: data.termToRepeat,
+  childElementIds: data.childElementIds.filter(
+    id => id !== idForElementToRemove,
+  ),
+});
+
 const RepetitionType = {
   typeTag: repetitionTypeTag,
   expansionType: {

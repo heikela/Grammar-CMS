@@ -81,4 +81,39 @@ describe('Repetition component', () => {
       expect(firstChildComponent.props().elementId).toEqual(addedChildElement);
     }
   });
+
+  it('allows removing elements from the repetition', () => {
+    const repetitionComponent = subject.find(RepetitionComponentType.component);
+    expect(repetitionComponent.exists()).toBeTruthy();
+    const addNewElementButton = subject.find('AddNewElementButton');
+    expect(addNewElementButton.exists()).toBeTruthy();
+    addNewElementButton.simulate('click');
+    addNewElementButton.simulate('click');
+    addNewElementButton.simulate('click');
+    const state = store.getState();
+    const repetitionElement = getElement(state, docName, 'root');
+    expect(repetitionElement).toBeTruthy();
+    if (repetitionElement) {
+      const originalChildElementIds = repetitionElement.data.childElementIds;
+      expect(originalChildElementIds.size).toEqual(3);
+      const middleChildElementId = originalChildElementIds.get(1);
+      const middleChildRepetitionWrapper = repetitionComponent.findWhere(
+        reactWrapper => {
+          return reactWrapper.name() === 'RepetitionWrapper' &&
+            reactWrapper.props().elementId === middleChildElementId;
+        },
+      );
+      const removeButton = middleChildRepetitionWrapper.find('RemoveButton');
+      removeButton.simulate('click');
+      const updatedRepetitionElement = getElement(
+        store.getState(),
+        docName,
+        'root',
+      );
+      const newChildElementIds = updatedRepetitionElement.data.childElementIds;
+      expect(newChildElementIds.size).toEqual(2);
+      expect(newChildElementIds.get(0)).toEqual(originalChildElementIds.get(0));
+      expect(newChildElementIds.get(1)).toEqual(originalChildElementIds.get(2));
+    }
+  });
 });
