@@ -14,8 +14,8 @@ import {
   updateElement,
 } from '../../DocumentEditor/DocumentEditorState';
 
-const AddNewElementButton = ({ addElement }) => (
-  <span onClick={addElement}>Add Element</span>
+const AddNewElementButton = ({ addElement, termToRepeat }) => (
+  <span onClick={addElement}>Add {termToRepeat}</span>
 );
 
 const RemoveButton = ({ removeElement }) => (
@@ -61,7 +61,10 @@ export class RepetitionComponent extends Component {
             />
           </RepetitionWrapper>
         ))}
-        <AddNewElementButton addElement={this.props.addElement} />
+        <AddNewElementButton
+          addElement={this.props.addElement}
+          termToRepeat={this.props.element.data.termToRepeat}
+        />
       </div>
     );
   }
