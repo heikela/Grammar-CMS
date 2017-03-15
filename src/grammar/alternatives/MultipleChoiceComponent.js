@@ -8,54 +8,72 @@ import {
   updateElement,
 } from '../../DocumentEditor/DocumentEditorState';
 import { genId } from '../../util';
-import ElementContainer from '../../DocumentEditor/ElementComponent';
+import ElementContainer, {
+  ElementHeading,
+} from '../../DocumentEditor/ElementComponent';
 import type {
   ElementComponentProps,
 } from '../../DocumentEditor/ElementComponent';
 
 type Props =
   & {
-    handleChange(x: Event): void,
+    handleSelection(selection: string): void,
   }
   & ElementComponentProps;
 
 const NO_SELECTION = '_not_chosen';
+
+const ReselectButton = ({ reselect }) => (
+  <span onClick={reselect}>Reselect</span>
+);
 
 export class MultipleChoiceComponent extends Component {
   props: Props;
 
   render() {
     const data: MultipleChoice = this.props.element.data;
-    const options = data.alternatives.map(alternative => (
-      <option key={alternative} value={alternative}>{alternative}</option>
-    ));
-    const select = (
-      <select onChange={this.props.handleChange}>
-        <option value={NO_SELECTION}>Choose Type</option>
-        {options}
-      </select>
-    );
-    const child = data.selectedAlternative
-      ? <ElementContainer
-          documentId={this.props.documentId}
-          elementId={data.selectedAlternative.childElementId}
-          grammar={this.props.grammar}
-          componentRepository={this.props.componentRepository}
-        />
-      : null;
-    return (
-      <div>
-        {select}
-        {child}
-      </div>
-    );
+    if (data.selectedAlternative) {
+      return (
+        <div>
+          <ElementHeading>
+            {data.selectedAlternative.chosenAlternative}
+            {': '}
+            <ReselectButton
+              reselect={() => this.props.handleSelection(NO_SELECTION)}
+            />
+          </ElementHeading>
+          <ElementContainer
+            documentId={this.props.documentId}
+            elementId={data.selectedAlternative.childElementId}
+            grammar={this.props.grammar}
+            componentRepository={this.props.componentRepository}
+          />
+        </div>
+      );
+    } else {
+      const options = data.alternatives.map(alternative => (
+        <option key={alternative} value={alternative}>{alternative}</option>
+      ));
+      const select = (
+        <select onChange={e => this.props.handleSelection(e.target.value)}>
+          <option value={NO_SELECTION}>Choose Type</option>
+          {options}
+        </select>
+      );
+      return (
+        <div>
+          <ElementHeading>
+            {select}
+          </ElementHeading>
+        </div>
+      );
+    }
   }
 }
 
 const mapStateToProps = null;
 const mapDispatchToProps = (dispatch: Dispatch<*>, ownProps) => ({
-  handleChange: e => {
-    const chosenAlternative = e.target.value;
+  handleSelection: (chosenAlternative: string) => {
     if (chosenAlternative !== NO_SELECTION) {
       const newElementId = genId('elem');
       const newElements = ownProps.grammar.createElements(

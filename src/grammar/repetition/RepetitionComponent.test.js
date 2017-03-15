@@ -110,10 +110,17 @@ describe('Repetition component', () => {
         docName,
         'root',
       );
-      const newChildElementIds = updatedRepetitionElement.data.childElementIds;
-      expect(newChildElementIds.size).toEqual(2);
-      expect(newChildElementIds.get(0)).toEqual(originalChildElementIds.get(0));
-      expect(newChildElementIds.get(1)).toEqual(originalChildElementIds.get(2));
+      expect(updatedRepetitionElement).toBeTruthy();
+      if (updatedRepetitionElement) {
+        const newChildElementIds = updatedRepetitionElement.data.childElementIds;
+        expect(newChildElementIds.size).toEqual(2);
+        expect(newChildElementIds.get(0)).toEqual(
+          originalChildElementIds.get(0),
+        );
+        expect(newChildElementIds.get(1)).toEqual(
+          originalChildElementIds.get(2),
+        );
+      }
     }
   });
 });

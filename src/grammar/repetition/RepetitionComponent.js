@@ -2,7 +2,9 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { repetitionTypeTag, appendChild, removeChild } from './Repetition';
-import ElementContainer from '../../DocumentEditor/ElementComponent';
+import ElementContainer, {
+  ElementHeading,
+} from '../../DocumentEditor/ElementComponent';
 import type {
   ElementComponentProps,
 } from '../../DocumentEditor/ElementComponent';
@@ -20,10 +22,12 @@ const RemoveButton = ({ removeElement }) => (
   <span onClick={removeElement}>Remove</span>
 );
 
-const RepetitionWrapper = ({ removeElement, elementId, children }) => (
+const RepetitionWrapper = ({ removeElement, index, elementId, children }) => (
   <div>
+    <ElementHeading>
+      {index + ': '}<RemoveButton removeElement={removeElement} />
+    </ElementHeading>
     {children}
-    <RemoveButton removeElement={removeElement} />
   </div>
 );
 
@@ -42,9 +46,10 @@ export class RepetitionComponent extends Component {
   render() {
     return (
       <div>
-        {this.props.element.data.childElementIds.toArray().map(id => (
+        {this.props.element.data.childElementIds.toArray().map((id, index) => (
           <RepetitionWrapper
             removeElement={e => this.props.removeElement(id)}
+            index={index}
             elementId={id}
             key={id}
           >

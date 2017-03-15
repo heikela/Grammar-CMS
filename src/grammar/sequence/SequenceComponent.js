@@ -1,7 +1,9 @@
 // @flow
 import React, { Component } from 'react';
 import type { SequenceElementData } from './Sequence';
-import ElementContainer from '../../DocumentEditor/ElementComponent';
+import ElementContainer, {
+  ElementHeading,
+} from '../../DocumentEditor/ElementComponent';
 import type {
   ElementComponentProps,
 } from '../../DocumentEditor/ElementComponent';
@@ -16,7 +18,9 @@ export class SequenceComponent extends Component {
     const data: SequenceElementData = this.props.element.data;
     const fields = data.fields.map(field => (
       <div key={field}>
-        <span>{field}</span>
+        <ElementHeading>
+          <span>{field}: </span>
+        </ElementHeading>
         <ElementContainer
           documentId={this.props.documentId}
           elementId={data.childElementIds.get(field)}

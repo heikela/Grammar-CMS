@@ -2,6 +2,7 @@
 
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
+import styled from 'styled-components';
 
 import Grammar from '../grammar/Grammar';
 import Repository from '../repository/Repository';
@@ -25,6 +26,16 @@ export type ElementComponentProps = $Subtype<
   }
   & ElementContainerProps>;
 
+const StyledElementComponent = styled.div`
+  border: 2px solid #999;
+  border-radius: 2px;
+  padding: 3px;
+`;
+
+export const ElementHeading = styled.div`
+  background-color: #999;
+`;
+
 class ElementComponent extends Component {
   props: ElementComponentProps;
   render() {
@@ -34,13 +45,15 @@ class ElementComponent extends Component {
       element.typeTag,
     ).component;
     return (
-      <Renderer
-        documentId={this.props.documentId}
-        elementId={this.props.elementId}
-        element={element}
-        grammar={this.props.grammar}
-        componentRepository={this.props.componentRepository}
-      />
+      <StyledElementComponent>
+        <Renderer
+          documentId={this.props.documentId}
+          elementId={this.props.elementId}
+          element={element}
+          grammar={this.props.grammar}
+          componentRepository={this.props.componentRepository}
+        />
+      </StyledElementComponent>
     );
   }
 }
