@@ -7,6 +7,7 @@ import Sequence from './grammar/sequence/Sequence';
 import Repetition from './grammar/repetition/Repetition';
 import Alternatives from './grammar/alternatives/Alternatives';
 import TextField from './grammar/textField/TextField';
+import Constant from './grammar/constant/Constant';
 import Repository from './repository/Repository';
 import {
   MultipleChoiceComponentType,
@@ -16,6 +17,7 @@ import { SequenceComponentType } from './grammar/sequence/SequenceComponent';
 import {
   RepetitionComponentType,
 } from './grammar/repetition/RepetitionComponent';
+import { ConstantComponentType } from './grammar/constant/ConstantComponent';
 import Serialized from './serialize/SerializedViewer';
 
 import reducer, {
@@ -30,7 +32,31 @@ grammar.registerExpansionType(Sequence.expansionType);
 grammar.registerExpansionType(Repetition.expansionType);
 grammar.registerExpansionType(Alternatives.expansionType);
 grammar.registerExpansionType(TextField.expansionType);
-grammar.setExpansion('root', Repetition.typeTag, 'customer');
+grammar.registerExpansionType(Constant.expansionType);
+grammar.setExpansion('root', Alternatives.typeTag, [
+  'sequence',
+  'repetition',
+  'alternatives',
+  'textField',
+  'constant',
+]);
+grammar.setExpansion('term', Alternatives.typeTag, [
+  'sequence',
+  'repetition',
+  'alternatives',
+  'textField',
+  'constant',
+]);
+grammar.setExpansion('sequence', Repetition.typeTag, 'expansion');
+grammar.setExpansion('expansion', Sequence.typeTag, ['termName', 'term']);
+grammar.setExpansion('repetition', Sequence.typeTag, ['expansion']);
+grammar.setExpansion('termName', TextField.typeTag, '');
+grammar.setExpansion('alternatives', Repetition.typeTag, 'expansion');
+grammar.setExpansion('textField', Constant.typeTag, '_textField');
+grammar.setExpansion('constant', Sequence.typeTag, ['value']);
+grammar.setExpansion('value', TextField.typeTag, '');
+
+grammar.setExpansion('docRoot', Repetition.typeTag, 'customer');
 grammar.setExpansion('customer', Sequence.typeTag, ['name', 'contact']);
 grammar.setExpansion('name', TextField.typeTag, '');
 grammar.setExpansion('contact', Alternatives.typeTag, ['email', 'phone']);
@@ -42,6 +68,7 @@ knownDocumentComponents.registerType(SequenceComponentType);
 knownDocumentComponents.registerType(RepetitionComponentType);
 knownDocumentComponents.registerType(MultipleChoiceComponentType);
 knownDocumentComponents.registerType(TextFieldComponentType);
+knownDocumentComponents.registerType(ConstantComponentType);
 
 const docName = '1stDoc';
 
