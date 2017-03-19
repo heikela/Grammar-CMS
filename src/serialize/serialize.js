@@ -33,7 +33,7 @@ export const serialize = (
         return null;
       }
     case constantTypeTag:
-      return element.data.value;
+      return element.data;
     case sequenceTypeTag:
       const sequenceData: SequenceElementData = element.data;
       const result = {};

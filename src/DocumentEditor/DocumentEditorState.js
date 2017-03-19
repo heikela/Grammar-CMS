@@ -5,7 +5,7 @@ import type { documentElement, createElementsResult } from '../grammar/Grammar';
 
 export const ROOT_ELEMENT_ID = 'root';
 
-type document = Map<string, documentElement>;
+export type document = Map<string, documentElement>;
 
 export type documentEditorState = {
   elements: Map<string, document>,
@@ -15,8 +15,7 @@ export const getElement = (
   state: documentEditorState,
   documentId: string,
   elementId: string,
-): ?documentElement =>
-  state.elements.getIn([documentId, elementId]);
+): ?documentElement => state.elements.getIn([documentId, elementId]);
 
 export type updateAction = {
   type: 'UPDATE_ELEMENT',

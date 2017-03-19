@@ -5,11 +5,17 @@ import { genId } from '../../util';
 import type { createElementsResult } from '../Grammar';
 
 export const sequenceTypeTag = 'SEQUENCE';
+type sequenceTypeTagType = 'SEQUENCE' // has to be same value as the const above
 
 export type SequenceElementData = {
   fields: Array<string>,
   childElementIds: Map<string, string>,
 };
+
+export type SequenceElementType = {
+  typeTag: sequenceTypeTagType,
+  data: SequenceElementData
+}
 
 const SequenceType = {
   typeTag: sequenceTypeTag,
