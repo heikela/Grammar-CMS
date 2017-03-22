@@ -1,7 +1,10 @@
+# The part below includes comments and content from styled components flow guide
 [ignore]
+# We vendor our src directory, which is not needed for type-checking
+.*/styled-components/src/.*
+.*/dangerfile.js
 
 [libs]
-# The part below includes comments and content from styled components flow guide
 
 # This is where your own flow-typed libdefs go
 flow-typed
