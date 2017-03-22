@@ -178,7 +178,7 @@ const addTermToGrammarAndReturnEntriesForNewTerms = (
   }
 };
 
-export const grammarFromDocument = (document: document) => {
+export const grammarFromDocument = (document: document): Grammar => {
   const grammar = new Grammar();
   grammar.registerExpansionType(Sequence.expansionType);
   grammar.registerExpansionType(Repetition.expansionType);
