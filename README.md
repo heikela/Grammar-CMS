@@ -1,3 +1,13 @@
+A library for creating admin UIs / content management UIs based on a grammar that describes the desired document structure. Incomplete work in progress.
+
+TODO
+
+- [x] Allow defining a grammar as a document, and base another document on this grammar
+- [ ] Make better use of Flow
+- [ ] Persist documents
+- [ ] Include a mechanism to validate that the documents are complete
+- [ ] Improve the UI to a passable level
+
 This project was bootstrapped with [Create React App](https://github.com/facebookincubator/create-react-app).
 
 Below you will find some information on how to perform common tasks.<br>
